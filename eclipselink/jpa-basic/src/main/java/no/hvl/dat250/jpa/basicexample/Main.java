@@ -14,22 +14,54 @@ public class Main {
     public static void main(String[] args) {
         factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         EntityManager em = factory.createEntityManager();
-        // read the existing entries and write to console
-        Query q = em.createQuery("select t from Todo t");
-        List<Todo> todoList = q.getResultList();
-        for (Todo todo : todoList) {
-            System.out.println(todo);
-        }
-        System.out.println("Size: " + todoList.size());
-
-        // create new todo
         em.getTransaction().begin();
-        Todo todo = new Todo();
-        todo.setSummary("This is a test");
-        todo.setDescription("This is a test");
-        em.persist(todo);
+
+        UserClass user = new UserClass();
+        user.setUsername("TestUser1");
+        user.setPassword("123");
+        user.setUserType(UserType.REGULAR);
+
+
+        UserClass user2 = new UserClass();
+        user2.setUsername("TestUser2");
+        user2.setPassword("456");
+        user2.setUserType(UserType.ADMIN);
+
+        Poll poll = new Poll ();
+        poll.setIsPrivate(false);
+        poll.setQuestion("Lorem ipsum?");
+        poll.setVotingStart("Today");
+        poll.setVotingEnd("Tomorrow");
+        poll.addCreator(user);
+
+        Vote vote = user.voteOnPoll(poll, "yes", false);
+        Vote vote2 =user2.voteOnPoll(poll, "no", false);
+
+        em.persist(poll);
+        em.persist(user);
+        em.persist(user2);
+        em.persist(vote);
+        em.persist(vote2);
         em.getTransaction().commit();
 
+        Query q = em.createQuery("select u from UserClass u");
+        List<UserClass> userList = q.getResultList();
+        for (UserClass u : userList) {
+            System.out.println(u);
+        }
+
+
+        Query q2 = em.createQuery("select p from Poll p");
+        List<Poll> pollList = q2.getResultList();
+        for (Poll p : pollList) {
+            System.out.println(p);
+        }
+
+        Query q3 = em.createQuery("select v from Vote v");
+        List<Vote> voteList = q3.getResultList();
+        for (Vote v : voteList) {
+            System.out.println(v);
+        }
         em.close();
     }
 }
