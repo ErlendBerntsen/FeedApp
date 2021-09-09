@@ -1,5 +1,6 @@
 package no.hvl.dat250.jpa.basicexample;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -8,11 +9,11 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 public class Main {
-    private static final String PERSISTENCE_UNIT_NAME = "todos";
-    private static EntityManagerFactory factory;
+    private static final String PERSISTENCE_UNIT_NAME = "votingsystem";
+
 
     public static void main(String[] args) {
-        factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         EntityManager em = factory.createEntityManager();
         em.getTransaction().begin();
 
@@ -30,8 +31,8 @@ public class Main {
         Poll poll = new Poll ();
         poll.setIsPrivate(false);
         poll.setQuestion("Lorem ipsum?");
-        poll.setVotingStart("Today");
-        poll.setVotingEnd("Tomorrow");
+        poll.setVotingStart(Timestamp.valueOf("2020-09-20 00:00:00"));
+        poll.setVotingEnd(Timestamp.valueOf("2020-09-30 00:00:00"));
         poll.addCreator(user);
 
         Vote vote = user.voteOnPoll(poll, "yes", false);

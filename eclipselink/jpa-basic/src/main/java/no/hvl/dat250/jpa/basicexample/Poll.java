@@ -1,9 +1,9 @@
 package no.hvl.dat250.jpa.basicexample;
 
-import jdk.jfr.MetadataDefinition;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,13 +16,18 @@ public class Poll {
     Long id;
     String question;
 
-    //TODO make this temporal and choose a java date & time datastructure
-    String votingStart;
-    String votingEnd;
+    /*
+        String format for Timestamp: "yyyy-mm-dd hh:mm:ss.f..."
+        The fractional portion of timestamp constants (.f...) can be omitted.
+        For example: Timestamp timestamp = Timestamp.valueOf("2020-09-20 12:00:00")
+     */
+    Timestamp votingStart;
+    Timestamp votingEnd;
 
     Boolean isPrivate;
+
     //TODO Make this a unique generated value (only if isPrivate is true)
-    Long code;
+    Integer code;
 
     @ManyToOne
     UserClass creator;
@@ -35,6 +40,11 @@ public class Poll {
     public void addCreator(UserClass user){
         this.creator = user;
         user.getCreatedPolls().add(this);
+    }
+
+    @PrePersist
+    private void generateCode(){
+
     }
 
     @Override

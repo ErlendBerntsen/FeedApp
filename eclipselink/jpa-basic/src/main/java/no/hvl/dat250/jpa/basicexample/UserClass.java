@@ -51,7 +51,9 @@ public class UserClass {
                 ", username: " + username +
                 ", password: " + password +
                 ", usertype: " + userType +
-                ", createdpolls: " + createdPolls.toString());
+                ", createdpolls: " + createdPolls.toString() +
+                ", votes: " + votes.toString());
+
     }
 
     @Override
