@@ -40,8 +40,7 @@ public class DatabaseTest {
         poll.setCode(123);
 
         vote = new Vote ();
-        vote.setAnonVote(false);
-        vote.setGuestVote(false);
+        vote.setVoteType(VoteType.USER);
         vote.setOptionChosen("yes");
     }
 

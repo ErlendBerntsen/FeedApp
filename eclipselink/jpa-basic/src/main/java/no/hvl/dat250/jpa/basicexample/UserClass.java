@@ -28,11 +28,11 @@ public class UserClass {
 
     public UserClass(){}
 
-    public Vote voteOnPoll(Poll poll, String option, boolean isAnonymous){
+    public Vote voteOnPoll(Poll poll, String option, VoteType voteType){
         Vote vote = new Vote();
         vote.setOptionChosen(option);
         vote.addVoter(this);
-        vote.setAnonVote(isAnonymous);
+        vote.setVoteType(voteType);
         vote.addPoll(poll);
         return vote;
     }

@@ -3,7 +3,6 @@ package no.hvl.dat250.jpa.basicexample;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 @Entity
 @Data
@@ -13,13 +12,14 @@ public class Vote {
     Long  id;
 
     String optionChosen;
-    Boolean guestVote = false;
-    Boolean anonVote = false;
+
+    @Enumerated(EnumType.STRING)
+    VoteType voteType;
 
     @ManyToOne
     UserClass voter;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     Poll poll;
 
     public Vote(){
@@ -39,8 +39,7 @@ public class Vote {
     public String toString(){
         return ("id: " + id +
                 ", optionChosen: " + optionChosen +
-                ", guestVote: " + guestVote +
-                ", anonvote: " + anonVote +
+                ", voteType: " + voteType +
                 ", voter: " + getVoterString());
     }
 
@@ -51,6 +50,6 @@ public class Vote {
 
     @Override
     public int hashCode(){
-        return Objects.hash(optionChosen);
+        return getClass().hashCode();
     }
 }

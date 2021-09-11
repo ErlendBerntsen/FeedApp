@@ -32,7 +32,7 @@ public class Poll {
     @ManyToOne
     UserClass creator;
 
-    @OneToMany (orphanRemoval = true)
+    @OneToMany (mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Vote> votes = new ArrayList<>();
 
     public Poll(){}
