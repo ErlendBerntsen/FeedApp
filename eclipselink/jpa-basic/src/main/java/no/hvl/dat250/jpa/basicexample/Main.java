@@ -1,8 +1,10 @@
 package no.hvl.dat250.jpa.basicexample;
 
-import no.hvl.dat250.jpa.basicexample.DAO.PollDAOImpl;
-import no.hvl.dat250.jpa.basicexample.DAO.UserDAOImpl;
-import no.hvl.dat250.jpa.basicexample.DAO.VoteDAOImpl;
+import no.hvl.dat250.jpa.basicexample.dao.PollDAOImpl;
+import no.hvl.dat250.jpa.basicexample.dao.UserDAOImpl;
+import no.hvl.dat250.jpa.basicexample.dao.VoteDAOImpl;
+import no.hvl.dat250.jpa.basicexample.entities.Poll;
+import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 
 import java.sql.Timestamp;
 
@@ -13,15 +15,18 @@ import javax.persistence.Persistence;
 
 public class Main {
     public static final String PERSISTENCE_UNIT_NAME = "votingsystem";
+    private static UserDAOImpl userDAO;
+    private static PollDAOImpl pollDAO;
+    private static VoteDAOImpl voteDAO;
 
 
     public static void main(String[] args) {
 
         EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         EntityManager em = factory.createEntityManager();
-        UserDAOImpl userDAO = new UserDAOImpl(em);
-        PollDAOImpl pollDAO = new PollDAOImpl(em);
-        VoteDAOImpl voteDAO = new VoteDAOImpl(em);
+        userDAO = new UserDAOImpl(em);
+        pollDAO = new PollDAOImpl(em);
+        voteDAO = new VoteDAOImpl(em);
 
 
         //TODO Create more test data
@@ -40,6 +45,12 @@ public class Main {
         user.voteOnPoll(poll, "yes", VoteType.USER);
         userDAO.saveUser(user);
         pollDAO.savePoll(poll);
+
+        em.getTransaction().begin();
+        em.createQuery("update UserClass u set u.username=:name where u.id=:id")
+        .setParameter("name", "updated username")
+        .setParameter("id", user.getId()).executeUpdate();
+        em.getTransaction().commit();
 
         em.close();
 

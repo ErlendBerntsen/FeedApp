@@ -1,7 +1,7 @@
-package no.hvl.dat250.jpa.basicexample.DAO;
+package no.hvl.dat250.jpa.basicexample.dao;
 
-import no.hvl.dat250.jpa.basicexample.Poll;
-import no.hvl.dat250.jpa.basicexample.Vote;
+import no.hvl.dat250.jpa.basicexample.entities.Poll;
+import no.hvl.dat250.jpa.basicexample.entities.Vote;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -50,7 +50,6 @@ public class VoteDAOImpl implements VoteDAO{
         Vote vote = voteMaybe.get();
         vote.setOptionChosen(updatedVote.getOptionChosen());
         vote.setVoteType(updatedVote.getVoteType());
-        //Being allowed to update the voter or the poll in a vote does not make any sense
         saveVote(vote);
     }
 
@@ -60,8 +59,10 @@ public class VoteDAOImpl implements VoteDAO{
         if(voteMaybe.isEmpty()){
             return;
         }
+        voteMaybe.get().removeVoter();
+        voteMaybe.get().removePoll();
         em.getTransaction().begin();
-        em.createQuery("delete from Vote where id=:id").setParameter("id", id).executeUpdate();
+        em.remove(voteMaybe.get());
         em.getTransaction().commit();
     }
 

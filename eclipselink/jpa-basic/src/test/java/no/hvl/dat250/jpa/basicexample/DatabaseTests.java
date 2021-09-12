@@ -1,8 +1,11 @@
 package no.hvl.dat250.jpa.basicexample;
 
-import no.hvl.dat250.jpa.basicexample.DAO.PollDAOImpl;
-import no.hvl.dat250.jpa.basicexample.DAO.UserDAOImpl;
-import no.hvl.dat250.jpa.basicexample.DAO.VoteDAOImpl;
+import no.hvl.dat250.jpa.basicexample.dao.PollDAOImpl;
+import no.hvl.dat250.jpa.basicexample.dao.UserDAOImpl;
+import no.hvl.dat250.jpa.basicexample.dao.VoteDAOImpl;
+import no.hvl.dat250.jpa.basicexample.entities.Poll;
+import no.hvl.dat250.jpa.basicexample.entities.UserClass;
+import no.hvl.dat250.jpa.basicexample.entities.Vote;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +18,7 @@ import java.sql.Timestamp;
 
 import static org.junit.Assert.assertEquals;
 
-public class DatabaseTest {
+public class DatabaseTests {
     private static final String PERSISTENCE_UNIT_NAME = "votingsystem";
     private static EntityManagerFactory factory;
     private EntityManager em;

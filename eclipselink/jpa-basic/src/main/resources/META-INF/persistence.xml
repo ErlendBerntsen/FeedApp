@@ -3,9 +3,9 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
     <persistence-unit name="votingsystem" transaction-type="RESOURCE_LOCAL">
-        <class>no.hvl.dat250.jpa.basicexample.UserClass</class>
-        <class>no.hvl.dat250.jpa.basicexample.Poll</class>
-        <class>no.hvl.dat250.jpa.basicexample.Vote</class>
+        <class>no.hvl.dat250.jpa.basicexample.entities.UserClass</class>
+        <class>no.hvl.dat250.jpa.basicexample.entities.Poll</class>
+        <class>no.hvl.dat250.jpa.basicexample.entities.Vote</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>

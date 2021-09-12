@@ -1,7 +1,7 @@
-package no.hvl.dat250.jpa.basicexample.DAO;
+package no.hvl.dat250.jpa.basicexample.dao;
 
-import no.hvl.dat250.jpa.basicexample.Poll;
-import no.hvl.dat250.jpa.basicexample.Vote;
+import no.hvl.dat250.jpa.basicexample.entities.Poll;
+import no.hvl.dat250.jpa.basicexample.entities.Vote;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -53,9 +53,6 @@ public class PollDAOImpl implements PollDAO{
         poll.setVotingEnd(updatedPoll.getVotingEnd());
         poll.setIsPrivate(updatedPoll.getIsPrivate());
         poll.setCode(updatedPoll.getCode());
-        poll.setCreator(updatedPoll.getCreator());
-        poll.setVotes(updatedPoll.getVotes());
-        savePoll(poll);
     }
 
     @Override
@@ -64,8 +61,9 @@ public class PollDAOImpl implements PollDAO{
         if(pollMaybe.isEmpty()){
             return;
         }
+        pollMaybe.get().removeCreator();
         em.getTransaction().begin();
-        em.createQuery("delete from Poll where id=:id").setParameter("id", id).executeUpdate();
+        em.remove(pollMaybe.get());
         em.getTransaction().commit();
     }
 
@@ -80,6 +78,7 @@ public class PollDAOImpl implements PollDAO{
             Query q = em.createQuery("select p.votes from Poll p where p.id=:id");
             q.setParameter("id", id);
             List<Vote> votes = q.getResultList();
+            if(votes.isEmpty())return Optional.empty();
             return Optional.of(votes);
         }catch (NoResultException e) {
             return Optional.empty();

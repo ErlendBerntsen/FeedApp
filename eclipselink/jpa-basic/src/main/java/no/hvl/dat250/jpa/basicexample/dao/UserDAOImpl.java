@@ -1,6 +1,7 @@
-package no.hvl.dat250.jpa.basicexample.DAO;
+package no.hvl.dat250.jpa.basicexample.dao;
 
-import no.hvl.dat250.jpa.basicexample.UserClass;
+import no.hvl.dat250.jpa.basicexample.entities.UserClass;
+import no.hvl.dat250.jpa.basicexample.VoteType;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -47,36 +48,27 @@ public class UserDAOImpl implements UserDAO{
         if(userMaybe.isEmpty()){
             return;
         }
-//        em.getTransaction().begin();
-//        Query query = em.createQuery("update UserClass u set u.username=:username," +
-//                "u.password=:password," +
-//                "u.userType=:usertype," +
-//                "u.createdPolls=:createdpolls," +
-//                "u.votes=:votes");
-//        query.setParameter("username", updatedUser.getUsername());
-//        query.setParameter("password", updatedUser.getPassword());
-//        query.setParameter("usertype", updatedUser.getUserType());
-//        query.setParameter("createdpolls", updatedUser.getCreatedPolls());
-//        query.setParameter("votes", updatedUser.getVotes());
-//        query.executeUpdate();
-//        em.getTransaction().commit();
         UserClass user = userMaybe.get();
         user.setUsername(updatedUser.getUsername());
         user.setPassword(updatedUser.getPassword());
         user.setUserType(updatedUser.getUserType());
-        user.setCreatedPolls(updatedUser.getCreatedPolls());
-        user.setVotes(updatedUser.getVotes());
-        saveUser(user);
     }
 
     @Override
     public void deleteUser(Long id) {
+
         Optional<UserClass> userMaybe = getUserById(id);
         if(userMaybe.isEmpty()){
             return;
         }
+
         em.getTransaction().begin();
-        em.createQuery("delete from UserClass where id=:id").setParameter("id", id).executeUpdate();
+        userMaybe.get().getCreatedPolls().forEach(poll -> poll.setCreator(null));
+        userMaybe.get().getVotes().forEach(vote -> {
+            vote.setVoter(null);
+            vote.setVoteType(VoteType.GUEST);
+        });
+        em.remove(userMaybe.get());
         em.getTransaction().commit();
     }
 

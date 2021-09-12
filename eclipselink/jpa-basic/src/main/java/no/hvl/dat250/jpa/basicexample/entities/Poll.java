@@ -1,4 +1,4 @@
-package no.hvl.dat250.jpa.basicexample;
+package no.hvl.dat250.jpa.basicexample.entities;
 
 import lombok.Data;
 
@@ -24,9 +24,7 @@ public class Poll {
      */
     Timestamp votingStart;
     Timestamp votingEnd;
-
     Boolean isPrivate;
-
     Integer code;
 
     @ManyToOne
@@ -44,6 +42,12 @@ public class Poll {
         user.getCreatedPolls().add(this);
     }
 
+    public void removeCreator(){
+        assert(this.creator != null);
+        this.creator.getCreatedPolls().remove(this);
+        setCreator(null);
+    }
+
 
     private void generateCode(){
         Random random = new Random();
@@ -56,9 +60,9 @@ public class Poll {
     public String toString(){
         return ("id: " + id +
                 ", question: " + question +
-                ", votingstart: " + votingStart +
-                ", votingend: " + votingEnd +
-                ", isprivate: " + isPrivate +
+                ", votingStart: " + votingStart +
+                ", votingEnd: " + votingEnd +
+                ", isPrivate: " + isPrivate +
                 ", code: " + code +
                 ", creator: " + getCreatorString());
     }

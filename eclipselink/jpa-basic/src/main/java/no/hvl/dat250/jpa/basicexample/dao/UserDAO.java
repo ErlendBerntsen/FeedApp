@@ -1,6 +1,6 @@
-package no.hvl.dat250.jpa.basicexample.DAO;
+package no.hvl.dat250.jpa.basicexample.dao;
 
-import no.hvl.dat250.jpa.basicexample.UserClass;
+import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 
 import java.util.List;
 import java.util.Optional;

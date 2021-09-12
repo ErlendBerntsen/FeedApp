@@ -1,7 +1,7 @@
-package no.hvl.dat250.jpa.basicexample.DAO;
+package no.hvl.dat250.jpa.basicexample.dao;
 
-import no.hvl.dat250.jpa.basicexample.Poll;
-import no.hvl.dat250.jpa.basicexample.Vote;
+import no.hvl.dat250.jpa.basicexample.entities.Poll;
+import no.hvl.dat250.jpa.basicexample.entities.Vote;
 
 import java.util.List;
 import java.util.Optional;

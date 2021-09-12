@@ -1,6 +1,7 @@
-package no.hvl.dat250.jpa.basicexample;
+package no.hvl.dat250.jpa.basicexample.entities;
 
 import lombok.Data;
+import no.hvl.dat250.jpa.basicexample.VoteType;
 
 import javax.persistence.*;
 
@@ -33,6 +34,16 @@ public class Vote {
     public void addPoll(Poll poll){
         this.poll = poll;
         poll.getVotes().add(this);
+    }
+
+    public void removeVoter(){
+        this.voter.getVotes().remove(this);
+        setVoter(null);
+    }
+
+    public void removePoll(){
+        this.poll.getVotes().remove(this);
+        setPoll(null);
     }
 
     @Override

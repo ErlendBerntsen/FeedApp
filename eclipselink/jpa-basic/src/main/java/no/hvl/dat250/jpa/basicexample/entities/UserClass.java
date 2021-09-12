@@ -1,6 +1,8 @@
-package no.hvl.dat250.jpa.basicexample;
+package no.hvl.dat250.jpa.basicexample.entities;
 
 import lombok.Data;
+import no.hvl.dat250.jpa.basicexample.UserType;
+import no.hvl.dat250.jpa.basicexample.VoteType;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ public class UserClass {
     @Enumerated(value = EnumType.STRING)
     UserType userType;
 
-    @OneToMany(mappedBy = "creator", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "creator", cascade = {CascadeType.PERSIST})
     List<Poll> createdPolls = new ArrayList<>();
 
     @OneToMany(mappedBy = "voter", cascade = CascadeType.PERSIST)
@@ -41,7 +43,7 @@ public class UserClass {
         return  ("id: " + id +
                 ", username: " + username +
                 ", password: " + password +
-                ", usertype: " + userType);
+                ", userType: " + userType);
     }
 
 
@@ -50,8 +52,8 @@ public class UserClass {
         return ("id: " + id +
                 ", username: " + username +
                 ", password: " + password +
-                ", usertype: " + userType +
-                ", createdpolls: " + createdPolls.toString() +
+                ", userType: " + userType +
+                ", createdPolls: " + createdPolls.toString() +
                 ", votes: " + votes.toString());
 
     }
