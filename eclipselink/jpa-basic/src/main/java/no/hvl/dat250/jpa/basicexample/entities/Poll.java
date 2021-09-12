@@ -27,7 +27,7 @@ public class Poll {
     Boolean isPrivate;
     Integer code;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     UserClass creator;
 
     @OneToMany (mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -35,6 +35,13 @@ public class Poll {
 
     public Poll(){
         generateCode();
+    }
+
+    private void generateCode(){
+        Random random = new Random();
+        int upperbound = 1000000;
+        int lowerbound = 100000;
+        setCode(random.nextInt(upperbound-lowerbound)+lowerbound);
     }
 
     public void addCreator(UserClass user){
@@ -49,12 +56,9 @@ public class Poll {
     }
 
 
-    private void generateCode(){
-        Random random = new Random();
-        int upperbound = 1000000;
-        int lowerbound = 100000;
-        setCode(random.nextInt(upperbound-lowerbound)+lowerbound);
-    }
+
+
+
 
     @Override
     public String toString(){

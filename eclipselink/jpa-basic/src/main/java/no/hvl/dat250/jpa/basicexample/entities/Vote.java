@@ -17,10 +17,10 @@ public class Vote {
     @Enumerated(EnumType.STRING)
     VoteType voteType;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     UserClass voter;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     Poll poll;
 
     public Vote(){

@@ -22,7 +22,7 @@ public class UserClass {
     @Enumerated(value = EnumType.STRING)
     UserType userType;
 
-    @OneToMany(mappedBy = "creator", cascade = {CascadeType.PERSIST})
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.PERSIST)
     List<Poll> createdPolls = new ArrayList<>();
 
     @OneToMany(mappedBy = "voter", cascade = CascadeType.PERSIST)
@@ -33,7 +33,9 @@ public class UserClass {
     public Vote voteOnPoll(Poll poll, String option, VoteType voteType){
         Vote vote = new Vote();
         vote.setOptionChosen(option);
-        vote.addVoter(this);
+        if(voteType.equals(VoteType.USER)){
+            vote.addVoter(this);
+        }
         vote.setVoteType(voteType);
         vote.addPoll(poll);
         return vote;
