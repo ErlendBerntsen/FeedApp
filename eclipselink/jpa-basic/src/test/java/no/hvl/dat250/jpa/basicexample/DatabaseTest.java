@@ -1,5 +1,8 @@
 package no.hvl.dat250.jpa.basicexample;
 
+import no.hvl.dat250.jpa.basicexample.DAO.PollDAOImpl;
+import no.hvl.dat250.jpa.basicexample.DAO.UserDAOImpl;
+import no.hvl.dat250.jpa.basicexample.DAO.VoteDAOImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +28,12 @@ public class DatabaseTest {
     public void setUp(){
         factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         em = factory.createEntityManager();
-        em.clear();
-
+        UserDAOImpl userDAO = new UserDAOImpl(em);
+        userDAO.getAllUsers().forEach(user -> em.remove(user));
+        PollDAOImpl pollDAO = new PollDAOImpl(em);
+        pollDAO.getAllPolls().forEach(poll -> em.remove(poll));
+        VoteDAOImpl voteDAO = new VoteDAOImpl(em);
+        voteDAO.getAllVotes().forEach(vote -> em.remove(vote));
         user = new UserClass();
         user.setUsername("TestUser1");
         user.setPassword("123");

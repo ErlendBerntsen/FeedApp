@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 @Entity
 @Data
@@ -26,7 +27,6 @@ public class Poll {
 
     Boolean isPrivate;
 
-    //TODO Make this a unique generated value (only if isPrivate is true)
     Integer code;
 
     @ManyToOne
@@ -35,16 +35,21 @@ public class Poll {
     @OneToMany (mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Vote> votes = new ArrayList<>();
 
-    public Poll(){}
+    public Poll(){
+        generateCode();
+    }
 
     public void addCreator(UserClass user){
         this.creator = user;
         user.getCreatedPolls().add(this);
     }
 
-    @PrePersist
-    private void generateCode(){
 
+    private void generateCode(){
+        Random random = new Random();
+        int upperbound = 1000000;
+        int lowerbound = 100000;
+        setCode(random.nextInt(upperbound-lowerbound)+lowerbound);
     }
 
     @Override

@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserDAOImpl implements UserDAO{
-        EntityManager em;
+
+    EntityManager em;
 
     public UserDAOImpl(EntityManager em){
         this.em = em;
@@ -38,7 +39,6 @@ public class UserDAOImpl implements UserDAO{
         em.getTransaction().begin();
         em.persist(user);
         em.getTransaction().commit();
-
     }
 
     @Override

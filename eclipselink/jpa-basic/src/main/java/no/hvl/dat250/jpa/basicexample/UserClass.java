@@ -20,10 +20,10 @@ public class UserClass {
     @Enumerated(value = EnumType.STRING)
     UserType userType;
 
-    @OneToMany(mappedBy = "creator")
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.PERSIST)
     List<Poll> createdPolls = new ArrayList<>();
 
-    @OneToMany(mappedBy = "voter")
+    @OneToMany(mappedBy = "voter", cascade = CascadeType.PERSIST)
     List<Vote> votes = new ArrayList<>();
 
     public UserClass(){}

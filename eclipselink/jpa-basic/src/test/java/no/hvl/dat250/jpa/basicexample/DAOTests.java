@@ -1,6 +1,8 @@
 package no.hvl.dat250.jpa.basicexample;
 
+import no.hvl.dat250.jpa.basicexample.DAO.PollDAOImpl;
 import no.hvl.dat250.jpa.basicexample.DAO.UserDAOImpl;
+import no.hvl.dat250.jpa.basicexample.DAO.VoteDAOImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +22,8 @@ public class DAOTests {
     private EntityManager em;
     private UserDAOImpl userDAO;
     private UserClass user;
+    private PollDAOImpl pollDAO;
+    private VoteDAOImpl voteDAO;
 
     @Before
     public void setUp() {
@@ -27,6 +31,10 @@ public class DAOTests {
         em = factory.createEntityManager();
         userDAO = new UserDAOImpl(em);
         userDAO.getAllUsers().forEach(user -> em.remove(user));
+        pollDAO = new PollDAOImpl(em);
+        pollDAO.getAllPolls().forEach(poll -> em.remove(poll));
+        voteDAO = new VoteDAOImpl(em);
+        voteDAO.getAllVotes().forEach(vote -> em.remove(vote));
         user = new UserClass();
         user.setUsername("TestUser1");
         user.setPassword("123");
@@ -137,6 +145,53 @@ public class DAOTests {
         em.getTransaction().commit();
         Optional<UserClass> userMaybe = userDAO.getUserByUsernameAndPassword(user.getUsername(), "");
         assertFalse(userMaybe.isPresent());
+    }
+
+    @Test
+    public void onlyPublicPollsShouldBeRetrieved(){
+        Poll poll1 = new Poll();
+        poll1.setIsPrivate(false);
+
+        Poll poll2 = new Poll();
+        poll2.setIsPrivate(true);
+
+        em.getTransaction().begin();
+        em.persist(poll1);
+        em.persist(poll2);
+        em.getTransaction().commit();
+
+        List<Poll> publicPolls = pollDAO.getAllPublicPolls();
+        publicPolls.forEach(poll -> assertFalse(poll.getIsPrivate()));
+    }
+
+    @Test
+    public void pollShouldBeFoundByVoteId(){
+        Poll poll = new Poll();
+        Vote vote = new Vote();
+        vote.addPoll(poll);
+        em.getTransaction().begin();
+        em.persist(poll);
+        em.persist(vote);
+        em.getTransaction().commit();
+        Optional<Poll> pollMaybe = voteDAO.getPollFromVoteId(vote.getId());
+        assertTrue(pollMaybe.isPresent());
+        assertEquals(poll.getId(), pollMaybe.get().getId());
+    }
+
+    @Test
+    public void allVotesFromPollShouldBeFoundByPollId(){
+        Poll poll = new Poll();
+        pollDAO.savePoll(poll);
+        for(int i = 0; i < 10; i++) {
+            Vote vote = new Vote();
+            vote.addPoll(poll);
+            voteDAO.saveVote(vote);
+        }
+        Optional<List<Vote>> votesMaybe = pollDAO.getAllVotesFromPollById(poll.getId());
+        assertTrue(votesMaybe.isPresent());
+        List<Vote> votes = votesMaybe.get();
+        assertEquals(poll.getVotes().size(), votes.size());
+        poll.getVotes().forEach(vote -> assertTrue(votes.contains(vote)));
     }
 
 }
