@@ -1,10 +1,18 @@
 package no.hvl.dat250.jpa.basicexample;
 
 import no.hvl.dat250.jpa.basicexample.dao.PollDAOImpl;
+import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.dao.UserDAOImpl;
+import no.hvl.dat250.jpa.basicexample.dao.VoteDAOImpl;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import no.hvl.dat250.jpa.basicexample.entities.Vote;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -13,45 +21,73 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-
+@SpringBootApplication
 public class Main {
     public static final String PERSISTENCE_UNIT_NAME = "votingsystem";
     private static UserDAOImpl userDAO;
     private static PollDAOImpl pollDAO;
-
-
+    private static VoteDAOImpl voteDAO;
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
 
+
+        /*
         EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         EntityManager em = factory.createEntityManager();
         userDAO = new UserDAOImpl(em);
         pollDAO = new PollDAOImpl(em);
+        voteDAO = new VoteDAOImpl(em);
         createTestData();
+        printDatabase();
         em.close();
+
+         */
+    }
+
+    @Bean
+    public CommandLineRunner fillDatabase(UserDAO userDAO){
+        return args -> {
+            UserClass user1 = new UserClass();
+            user1.setUsername("Erlend");
+            user1.setPassword("p4ssw0rd");
+            user1.setUserType(UserType.ADMIN);
+
+            UserClass user2 = new UserClass();
+            user2.setUsername("Eivind");
+            user2.setPassword("qwerty123");
+            user2.setUserType(UserType.REGULAR);
+
+            UserClass user3 = new UserClass();
+            user3.setUsername("Arthur");
+            user3.setPassword("2309480wfoklsdfj");
+            user3.setUserType(UserType.REGULAR);
+
+            UserClass user4 = new UserClass();
+            user4.setUsername("Simen");
+            user4.setPassword("nimeS321");
+            user4.setUserType(UserType.REGULAR);
+
+            userDAO.save(user1);
+            userDAO.save(user2);
+            userDAO.save(user3);
+            userDAO.save(user4);
+
+            userDAO.findAll().forEach(user -> log.info("Created user: " + user.getUserStringWithoutPollsAndVotes()));
+
+        };
     }
 
     private static void createTestData(){
 
+        /*
         //Creating users
         UserClass user1 = new UserClass();
         user1.setUsername("Erlend");
         user1.setPassword("p4ssw0rd");
         user1.setUserType(UserType.ADMIN);
 
-        UserClass user2 = new UserClass();
-        user2.setUsername("Eivind");
-        user2.setPassword("qwerty123");
-        user2.setUserType(UserType.REGULAR);
 
-        UserClass user3 = new UserClass();
-        user3.setUsername("Arthur");
-        user3.setPassword("2309480wfoklsdfj");
-        user3.setUserType(UserType.REGULAR);
-
-        UserClass user4 = new UserClass();
-        user4.setUsername("Simen");
-        user4.setPassword("nimeS321");
-        user4.setUserType(UserType.REGULAR);
 
         //Creating polls
         Poll poll1 = new Poll ();
@@ -97,5 +133,30 @@ public class Main {
         pollDAO.savePoll(poll1);
         pollDAO.savePoll(poll2);
         pollDAO.savePoll(poll3);
+
+         */
+    }
+
+    private static void printDatabase(){
+        System.out.println("Creating users");
+        System.out.println("-----------------------------------------------");
+        for(UserClass u : userDAO.getAllUsers()){
+            System.out.println("Created user: " + u.toString());
+        }
+        System.out.println();
+
+        System.out.println("Creating polls");
+        System.out.println("-----------------------------------------------");
+        for(Poll p : pollDAO.getAllPolls()){
+            System.out.println("Created poll: " + p.toString());
+        }
+        System.out.println();
+
+        System.out.println("Creating votes");
+        System.out.println("-----------------------------------------------");
+        for(Vote v : voteDAO.getAllVotes()){
+            System.out.println("Created vote: " + v.toString());
+        }
+
     }
 }

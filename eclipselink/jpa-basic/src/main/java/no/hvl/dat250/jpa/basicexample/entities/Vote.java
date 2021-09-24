@@ -51,7 +51,8 @@ public class Vote {
         return ("id: " + id +
                 ", optionChosen: " + optionChosen +
                 ", voteType: " + voteType +
-                ", voter: " + getVoterString());
+                ", voter: " + getVoterString() +
+                ", poll: " + poll.toString());
     }
 
     private String getVoterString(){

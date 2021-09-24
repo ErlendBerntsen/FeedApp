@@ -10,7 +10,7 @@ import javax.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 
-public class UserDAOImpl implements UserDAO{
+public class UserDAOImpl{
 
     EntityManager em;
 
@@ -18,7 +18,7 @@ public class UserDAOImpl implements UserDAO{
         this.em = em;
     }
 
-    @Override
+
     public Optional<UserClass> getUserById(Long id) {
         try{
             Query q = em.createQuery("select u from UserClass u where u.id=:id");
@@ -30,19 +30,19 @@ public class UserDAOImpl implements UserDAO{
         }
     }
 
-    @Override
+
     public List<UserClass> getAllUsers() {
         return em.createQuery("select u from UserClass u").getResultList();
     }
 
-    @Override
+
     public void saveUser(UserClass user) {
         em.getTransaction().begin();
         em.persist(user);
         em.getTransaction().commit();
     }
 
-    @Override
+
     public void updateUser(Long id, UserClass updatedUser) {
         Optional<UserClass> userMaybe = getUserById(id);
         if(userMaybe.isEmpty()){
@@ -54,7 +54,7 @@ public class UserDAOImpl implements UserDAO{
         user.setUserType(updatedUser.getUserType());
     }
 
-    @Override
+
     public void deleteUser(Long id) {
 
         Optional<UserClass> userMaybe = getUserById(id);
@@ -72,7 +72,7 @@ public class UserDAOImpl implements UserDAO{
         em.getTransaction().commit();
     }
 
-    @Override
+
     public Optional<UserClass> getUserByUsernameAndPassword(String username, String password) {
         try{
             Query q = em.createQuery("select u from UserClass u where u.username =:username and u.password=:password");

@@ -55,11 +55,6 @@ public class Poll {
         setCreator(null);
     }
 
-
-
-
-
-
     @Override
     public String toString(){
         return ("id: " + id +
@@ -79,4 +74,5 @@ public class Poll {
     public int hashCode(){
         return Objects.hash(question);
     }
+
 }

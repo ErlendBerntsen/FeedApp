@@ -1,5 +1,6 @@
 package no.hvl.dat250.jpa.basicexample.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.hvl.dat250.jpa.basicexample.UserType;
 import no.hvl.dat250.jpa.basicexample.VoteType;
@@ -41,6 +42,7 @@ public class UserClass {
         return vote;
     }
 
+    @JsonIgnore
     public String getUserStringWithoutPollsAndVotes(){
         return  ("id: " + id +
                 ", username: " + username +
