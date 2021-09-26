@@ -1,8 +1,6 @@
 package no.hvl.dat250.jpa.basicexample;
 
-import no.hvl.dat250.jpa.basicexample.dao.PollDAOImpl;
-import no.hvl.dat250.jpa.basicexample.dao.UserDAOImpl;
-import no.hvl.dat250.jpa.basicexample.dao.VoteDAOImpl;
+
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import no.hvl.dat250.jpa.basicexample.entities.Vote;
@@ -15,6 +13,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import java.sql.Timestamp;
+
 
 import static org.junit.Assert.assertEquals;
 
@@ -31,12 +30,11 @@ public class DatabaseTests {
     public void setUp(){
         factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
         em = factory.createEntityManager();
-        UserDAOImpl userDAO = new UserDAOImpl(em);
-        userDAO.getAllUsers().forEach(user -> em.remove(user));
-        PollDAOImpl pollDAO = new PollDAOImpl(em);
-        pollDAO.getAllPolls().forEach(poll -> em.remove(poll));
-        VoteDAOImpl voteDAO = new VoteDAOImpl(em);
-        voteDAO.getAllVotes().forEach(vote -> em.remove(vote));
+
+        em.createQuery("select p from Poll p").getResultList().forEach(poll -> em.remove(poll));
+        em.createQuery("select v from Vote v").getResultList().forEach(vote -> em.remove(vote));
+        em.createQuery("select u from UserClass u").getResultList().forEach(user -> em.remove(user));
+
         user = new UserClass();
         user.setUsername("TestUser1");
         user.setPassword("123");

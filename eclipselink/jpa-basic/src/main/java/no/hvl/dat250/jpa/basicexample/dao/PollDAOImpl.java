@@ -9,7 +9,7 @@ import javax.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 
-public class PollDAOImpl implements PollDAO{
+public class PollDAOImpl{
 
     EntityManager em;
 
@@ -17,7 +17,7 @@ public class PollDAOImpl implements PollDAO{
         this.em = em;
     }
 
-    @Override
+
     public Optional<Poll> getPollById(Long id) {
         try{
             Query q = em.createQuery("select p from Poll p where p.id=:id");
@@ -29,19 +29,17 @@ public class PollDAOImpl implements PollDAO{
         }
     }
 
-    @Override
+
     public List<Poll> getAllPolls() {
         return em.createQuery("select p from Poll p").getResultList();
     }
 
-    @Override
     public void savePoll(Poll poll) {
         em.getTransaction().begin();
         em.persist(poll);
         em.getTransaction().commit();
     }
 
-    @Override
     public void updatePoll(Long id, Poll updatedPoll) {
         Optional<Poll> pollMaybe = getPollById(id);
         if(pollMaybe.isEmpty()){
@@ -55,7 +53,7 @@ public class PollDAOImpl implements PollDAO{
         poll.setCode(updatedPoll.getCode());
     }
 
-    @Override
+
     public void deletePoll(Long id) {
         Optional<Poll> pollMaybe = getPollById(id);
         if(pollMaybe.isEmpty()){
@@ -67,12 +65,10 @@ public class PollDAOImpl implements PollDAO{
         em.getTransaction().commit();
     }
 
-    @Override
     public List<Poll> getAllPublicPolls() {
         return em.createQuery("select p from Poll p where p.isPrivate=false").getResultList();
     }
 
-    @Override
     public Optional<List<Vote>> getAllVotesFromPollById(Long id) {
         try{
             Query q = em.createQuery("select p.votes from Poll p where p.id=:id");

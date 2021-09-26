@@ -1,21 +1,16 @@
 package no.hvl.dat250.jpa.basicexample.dao;
 
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
-import no.hvl.dat250.jpa.basicexample.entities.Vote;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface PollDAO {
+@Repository
+public interface PollDAO extends JpaRepository<Poll, Long> {
 
-    //Default operations
-    Optional<Poll> getPollById(Long id);
-    List<Poll> getAllPolls();
-    void savePoll(Poll poll);
-    void updatePoll(Long id, Poll poll);
-    void deletePoll(Long id);
-
+    List<Poll> findByIsPrivate(boolean isPrivate);
     //Custom operations
-    List<Poll> getAllPublicPolls();
-    Optional<List<Vote>> getAllVotesFromPollById(Long id);
+    //Optional<List<Vote>> getAllVotesFromPollById(Long id);
 }

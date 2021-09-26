@@ -1,9 +1,6 @@
 package no.hvl.dat250.jpa.basicexample;
 
-import no.hvl.dat250.jpa.basicexample.dao.PollDAOImpl;
-import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
-import no.hvl.dat250.jpa.basicexample.dao.UserDAOImpl;
-import no.hvl.dat250.jpa.basicexample.dao.VoteDAOImpl;
+import no.hvl.dat250.jpa.basicexample.dao.*;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import no.hvl.dat250.jpa.basicexample.entities.Vote;
@@ -24,9 +21,6 @@ import javax.persistence.Persistence;
 @SpringBootApplication
 public class Main {
     public static final String PERSISTENCE_UNIT_NAME = "votingsystem";
-    private static UserDAOImpl userDAO;
-    private static PollDAOImpl pollDAO;
-    private static VoteDAOImpl voteDAO;
     private static final Logger log = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
@@ -46,7 +40,7 @@ public class Main {
     }
 
     @Bean
-    public CommandLineRunner fillDatabase(UserDAO userDAO){
+    public CommandLineRunner fillDatabase(UserDAO userDAO, PollDAO pollDAO){
         return args -> {
             UserClass user1 = new UserClass();
             user1.setUsername("Erlend");
@@ -68,6 +62,29 @@ public class Main {
             user4.setPassword("nimeS321");
             user4.setUserType(UserType.REGULAR);
 
+
+
+
+            Poll poll1 = new Poll ();
+            poll1.setIsPrivate(false);
+            poll1.setQuestion("Is pineapple on pizza allowed?");
+            poll1.setVotingStart(Timestamp.valueOf("2021-09-20 00:00:00"));
+            poll1.setVotingEnd(Timestamp.valueOf("2021-09-30 00:00:00"));
+            poll1.addCreator(user1);
+
+            Poll poll2 = new Poll ();
+            poll2.setIsPrivate(true);
+            poll2.setQuestion("Are dogs better than cats?");
+            poll2.setVotingStart(Timestamp.valueOf("2021-12-12 12:00:00"));
+            poll2.setVotingEnd(Timestamp.valueOf("2021-12-12 12:30:00"));
+            poll2.addCreator(user2);
+
+            Poll poll3 = new Poll ();
+            poll3.setIsPrivate(false);
+            poll3.setQuestion("Is there a war in Bas Sing Se?");
+            poll3.setVotingStart(Timestamp.valueOf(LocalDateTime.now()));
+            poll3.setVotingEnd(Timestamp.valueOf("2022-01-01 00:00:00"));
+
             userDAO.save(user1);
             userDAO.save(user2);
             userDAO.save(user3);
@@ -75,18 +92,20 @@ public class Main {
 
             userDAO.findAll().forEach(user -> log.info("Created user: " + user.getUserStringWithoutPollsAndVotes()));
 
+            pollDAO.save(poll1);
+            pollDAO.save(poll2);
+            pollDAO.save(poll3);
+
+            pollDAO.findAll().forEach(poll -> log.info("Created poll: " + poll.toString()));
+
+
+
         };
     }
 
     private static void createTestData(){
 
         /*
-        //Creating users
-        UserClass user1 = new UserClass();
-        user1.setUsername("Erlend");
-        user1.setPassword("p4ssw0rd");
-        user1.setUserType(UserType.ADMIN);
-
 
 
         //Creating polls
@@ -137,26 +156,5 @@ public class Main {
          */
     }
 
-    private static void printDatabase(){
-        System.out.println("Creating users");
-        System.out.println("-----------------------------------------------");
-        for(UserClass u : userDAO.getAllUsers()){
-            System.out.println("Created user: " + u.toString());
-        }
-        System.out.println();
 
-        System.out.println("Creating polls");
-        System.out.println("-----------------------------------------------");
-        for(Poll p : pollDAO.getAllPolls()){
-            System.out.println("Created poll: " + p.toString());
-        }
-        System.out.println();
-
-        System.out.println("Creating votes");
-        System.out.println("-----------------------------------------------");
-        for(Vote v : voteDAO.getAllVotes()){
-            System.out.println("Created vote: " + v.toString());
-        }
-
-    }
 }

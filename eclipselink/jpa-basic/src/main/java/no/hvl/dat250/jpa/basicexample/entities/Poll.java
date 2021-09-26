@@ -1,5 +1,8 @@
 package no.hvl.dat250.jpa.basicexample.entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.ObjectIdResolver;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -11,6 +14,7 @@ import java.util.Random;
 
 @Entity
 @Data
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", resolver = ObjectIdResolver.class)
 public class Poll {
     @Id
     @GeneratedValue
