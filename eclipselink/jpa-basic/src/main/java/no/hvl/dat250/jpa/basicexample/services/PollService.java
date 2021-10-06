@@ -37,7 +37,6 @@ public class PollService {
         var poll = getPoll(id);
         if(poll.isPresent()){
             var pollToUpdate = poll.get();
-            pollToUpdate.setId(updatedPoll.getId());
             pollToUpdate.setQuestion(updatedPoll.getQuestion());
             pollToUpdate.setVotingStart(updatedPoll.getVotingStart());
             pollToUpdate.setVotingEnd(updatedPoll.getVotingEnd());
