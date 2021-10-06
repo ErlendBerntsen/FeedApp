@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -21,5 +22,13 @@ public class PollService {
 
     public List<Poll> getAllPolls() {
         return pollDao.findAll();
+    }
+
+    public Optional<Poll> getPoll(long id) {
+        return pollDao.findById(id);
+    }
+
+    public Poll createPoll(Poll poll ) {
+        return pollDao.save(poll);
     }
 }
