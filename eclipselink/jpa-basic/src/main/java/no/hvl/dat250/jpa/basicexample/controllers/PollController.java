@@ -48,7 +48,7 @@ public class PollController {
         if(id.equals(poll.getId())){
             return ResponseEntity.ok(poll);
         }else{
-            return ResponseEntity.created(URI.create("/users/" + poll.getId())).build();
+            return ResponseEntity.created(URI.create("/polls/" + poll.getId())).build();
         }
     }
 }
