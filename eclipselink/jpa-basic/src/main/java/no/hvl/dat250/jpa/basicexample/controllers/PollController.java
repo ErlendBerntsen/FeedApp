@@ -41,4 +41,14 @@ public class PollController {
         var user = pollService.createPoll(poll);
         return ResponseEntity.created(URI.create("/polls/" + poll.getId())).build();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Poll> updatePoll(@PathVariable Long id, @RequestBody Poll updatedPoll){
+        var poll = pollService.updatePoll(id, updatedPoll);
+        if(id.equals(poll.getId())){
+            return ResponseEntity.ok(poll);
+        }else{
+            return ResponseEntity.created(URI.create("/users/" + poll.getId())).build();
+        }
+    }
 }

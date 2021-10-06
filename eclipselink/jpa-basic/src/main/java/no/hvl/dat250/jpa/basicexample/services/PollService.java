@@ -2,6 +2,7 @@ package no.hvl.dat250.jpa.basicexample.services;
 
 import no.hvl.dat250.jpa.basicexample.dao.PollDAO;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
+import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,5 +31,21 @@ public class PollService {
 
     public Poll createPoll(Poll poll ) {
         return pollDao.save(poll);
+    }
+
+    public Poll updatePoll(Long id, Poll updatedPoll){
+        var poll = getPoll(id);
+        if(poll.isPresent()){
+            var pollToUpdate = poll.get();
+            pollToUpdate.setId(updatedPoll.getId());
+            pollToUpdate.setQuestion(updatedPoll.getQuestion());
+            pollToUpdate.setVotingStart(updatedPoll.getVotingStart());
+            pollToUpdate.setVotingEnd(updatedPoll.getVotingEnd());
+            pollToUpdate.setIsPrivate(updatedPoll.getIsPrivate());
+            pollToUpdate.setCode(updatedPoll.getCode());
+            return pollToUpdate;
+        }else{
+            return createPoll(updatedPoll);
+        }
     }
 }
