@@ -37,9 +37,9 @@ public class PollController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody Poll poll){
-        var user = pollService.createPoll(poll);
-        return ResponseEntity.created(URI.create("/polls/" + poll.getId())).build();
+    public ResponseEntity<?> createPoll(@RequestBody Poll poll){
+        var newPoll = pollService.createPoll(poll);
+        return ResponseEntity.created(URI.create("/polls/" + newPoll.getId())).build();
     }
 
     @PutMapping("/{id}")
