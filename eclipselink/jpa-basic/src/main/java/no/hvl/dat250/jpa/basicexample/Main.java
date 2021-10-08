@@ -87,6 +87,7 @@ public class Main {
 
             user1.voteOnPoll(poll2, "yes", VoteType.USER);
             user2.voteOnPoll(poll2, "yes", VoteType.USER);
+            user2.voteOnPoll(poll3, "yes", VoteType.USER);
             user3.voteOnPoll(poll2, "yes", VoteType.USER);
             user4.voteOnPoll(poll2, "no", VoteType.USER);
 
