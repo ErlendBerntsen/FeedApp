@@ -63,4 +63,9 @@ public class PollService {
         }
         return Optional.empty();
     }
+
+    public Optional<List<Vote>> getAllVotes(Long id){
+        var poll = getPoll(id);
+        return poll.map(Poll::getVotes);
+    }
 }

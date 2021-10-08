@@ -1,5 +1,8 @@
 package no.hvl.dat250.jpa.basicexample.entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.ObjectIdResolver;
 import lombok.Data;
 import no.hvl.dat250.jpa.basicexample.VoteType;
 
@@ -7,6 +10,7 @@ import javax.persistence.*;
 
 @Entity
 @Data
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", resolver = ObjectIdResolver.class)
 public class Vote {
     @Id
     @GeneratedValue
