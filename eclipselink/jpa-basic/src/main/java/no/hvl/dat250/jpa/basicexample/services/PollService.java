@@ -3,6 +3,7 @@ package no.hvl.dat250.jpa.basicexample.services;
 import no.hvl.dat250.jpa.basicexample.dao.PollDAO;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
+import no.hvl.dat250.jpa.basicexample.entities.Vote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,5 +47,10 @@ public class PollService {
         }else{
             return createPoll(updatedPoll);
         }
+    }
+
+    public Optional<List<Vote>> getAllVotes(Long id){
+        var poll = getPoll(id);
+        return poll.map(Poll::getVotes);
     }
 }

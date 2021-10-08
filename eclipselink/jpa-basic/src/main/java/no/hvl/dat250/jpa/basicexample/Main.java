@@ -62,9 +62,6 @@ public class Main {
             user4.setPassword("nimeS321");
             user4.setUserType(UserType.REGULAR);
 
-
-
-
             Poll poll1 = new Poll ();
             poll1.setIsPrivate(false);
             poll1.setQuestion("Is pineapple on pizza allowed?");
@@ -85,6 +82,19 @@ public class Main {
             poll3.setVotingStart(Timestamp.valueOf(LocalDateTime.now()));
             poll3.setVotingEnd(Timestamp.valueOf("2022-01-01 00:00:00"));
 
+            user1.voteOnPoll(poll1, "yes", VoteType.USER);
+            user2.voteOnPoll(poll1, "no", VoteType.ANONYMOUS);
+
+            user1.voteOnPoll(poll2, "yes", VoteType.USER);
+            user2.voteOnPoll(poll2, "yes", VoteType.USER);
+            user3.voteOnPoll(poll2, "yes", VoteType.USER);
+            user4.voteOnPoll(poll2, "no", VoteType.USER);
+
+            Vote guestVote = new Vote();
+            guestVote.setVoteType(VoteType.GUEST);
+            guestVote.setOptionChosen("no");
+            guestVote.addPoll(poll2);
+
             userDAO.save(user1);
             userDAO.save(user2);
             userDAO.save(user3);
@@ -97,6 +107,7 @@ public class Main {
             pollDAO.save(poll3);
 
             pollDAO.findAll().forEach(poll -> log.info("Created poll: " + poll.toString()));
+
 
 
 

@@ -2,6 +2,7 @@ package no.hvl.dat250.jpa.basicexample.controllers;
 
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
+import no.hvl.dat250.jpa.basicexample.entities.Vote;
 import no.hvl.dat250.jpa.basicexample.services.PollService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,4 +52,14 @@ public class PollController {
             return ResponseEntity.created(URI.create("/polls/" + poll.getId())).build();
         }
     }
+
+    @GetMapping("/{id}/votes")
+    public ResponseEntity<?> getAllVotes(@PathVariable Long id){
+        var votes = pollService.getAllVotes(id);
+        if (votes.isPresent()) {
+            return new ResponseEntity<>(votes.get(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Could not find poll with " + id, HttpStatus.NOT_FOUND);
+    }
+
 }
