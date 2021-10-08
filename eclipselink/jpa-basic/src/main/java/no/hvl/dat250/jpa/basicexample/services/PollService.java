@@ -3,10 +3,12 @@ package no.hvl.dat250.jpa.basicexample.services;
 import no.hvl.dat250.jpa.basicexample.dao.PollDAO;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
+import no.hvl.dat250.jpa.basicexample.entities.Vote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,5 +48,19 @@ public class PollService {
         }else{
             return createPoll(updatedPoll);
         }
+    }
+
+    public void deletePoll(Long id) {
+        pollDao.deleteById(id);
+    }
+
+    public Optional<Vote> addVote(Long id, Vote vote) {
+        var poll = getPoll(id);
+        if(poll.isPresent()) {
+            var pollToVote = poll.get();
+            pollToVote.getVotes().add(vote);
+            return Optional.of(vote);
+        }
+        return Optional.empty();
     }
 }

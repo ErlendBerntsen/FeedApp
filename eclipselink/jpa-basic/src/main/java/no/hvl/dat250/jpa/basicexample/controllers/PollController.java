@@ -1,7 +1,7 @@
 package no.hvl.dat250.jpa.basicexample.controllers;
 
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
-import no.hvl.dat250.jpa.basicexample.entities.UserClass;
+import no.hvl.dat250.jpa.basicexample.entities.Vote;
 import no.hvl.dat250.jpa.basicexample.services.PollService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/polls")
@@ -50,5 +51,24 @@ public class PollController {
         }else{
             return ResponseEntity.created(URI.create("/polls/" + poll.getId())).build();
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePoll(@PathVariable Long id){
+        if(pollService.getPoll(id).isEmpty()){
+            return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
+        }
+        pollService.deletePoll(id);
+        return new ResponseEntity<>("Deleted poll with id " + id, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/votes")
+    public ResponseEntity<?> addVote(@PathVariable Long id, @RequestBody Vote vote) {
+
+        Optional<Vote> res = pollService.addVote(id, vote);
+        if (res.isEmpty()) {
+            return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.created(URI.create("/polls/" + id + "/votes/" + res.get().getId())).build();
     }
 }
