@@ -1,12 +1,10 @@
 package no.hvl.dat250.jpa.basicexample.entities;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.annotation.ObjectIdResolver;
 import lombok.Data;
 import no.hvl.dat250.jpa.basicexample.UserType;
 import no.hvl.dat250.jpa.basicexample.VoteType;
+import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -15,24 +13,23 @@ import java.util.Objects;
 
 @Entity
 @Data
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", resolver = ObjectIdResolver.class)
 public class UserClass {
     @Id
     @GeneratedValue
-    Long id;
+    private Long id;
 
-    String username;
-    String password;
+    private String username;
+    private String password;
 
     @Enumerated(value = EnumType.STRING)
-    UserType userType;
+    private UserType userType;
 
     @OneToMany(mappedBy = "creator", cascade = CascadeType.PERSIST)
-    List<Poll> createdPolls = new ArrayList<>();
+    private List<Poll> createdPolls = new ArrayList<>();
 
     @JsonIgnore//TODO:??????????????????????????????????????????????????????????????
     @OneToMany(mappedBy = "voter", cascade = CascadeType.PERSIST)
-    List<Vote> votes = new ArrayList<>();
+    private List<Vote> votes = new ArrayList<>();
 
     public UserClass(){}
 
@@ -54,6 +51,19 @@ public class UserClass {
                 ", username: " + username +
                 ", password: " + password +
                 ", userType: " + userType);
+    }
+
+    public UserDTO convertToDTO(){
+        List<Long> createdPollsId = new ArrayList<>();
+        createdPolls.forEach(poll -> createdPollsId.add(poll.getId()));
+        List<Long> votesId = new ArrayList<>();
+        votes.forEach(vote -> votesId.add(vote.getId()));
+        return new UserDTO(this.id,
+                this.username,
+                this.password,
+                this.userType,
+                createdPollsId,
+                votesId);
     }
 
 

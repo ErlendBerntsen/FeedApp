@@ -2,18 +2,15 @@ package no.hvl.dat250.jpa.basicexample.dao;
 
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.Vote;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface VoteDAO {
-    //Default operations
-    Optional<Vote> getVoteById(Long id);
-    List<Vote> getAllVotes();
-    void saveVote(Vote vote);
-    void updateVote(Long id, Vote vote);
-    void deleteVote(Long id);
+@Repository
+public interface VoteDAO extends JpaRepository<Vote, Long> {
 
     //Custom operations
-    Optional<Poll> getPollFromVoteId(Long id);
+    //Optional<Poll> getPollFromVoteId(Long id);
 }

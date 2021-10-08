@@ -9,7 +9,7 @@ import javax.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 
-public class VoteDAOImpl implements VoteDAO{
+public class VoteDAOImpl{
 
     EntityManager em;
 
@@ -17,7 +17,6 @@ public class VoteDAOImpl implements VoteDAO{
         this.em = em;
     }
 
-    @Override
     public Optional<Vote> getVoteById(Long id) {
         try{
             Query q = em.createQuery("select v from Vote v where v.id=:id");
@@ -29,19 +28,17 @@ public class VoteDAOImpl implements VoteDAO{
         }
     }
 
-    @Override
     public List<Vote> getAllVotes() {
         return em.createQuery("select v from Vote v").getResultList();
     }
 
-    @Override
+
     public void saveVote(Vote vote) {
         em.getTransaction().begin();
         em.persist(vote);
         em.getTransaction().commit();
     }
 
-    @Override
     public void updateVote(Long id, Vote updatedVote) {
         Optional<Vote> voteMaybe = getVoteById(id);
         if(voteMaybe.isEmpty()){
@@ -53,7 +50,6 @@ public class VoteDAOImpl implements VoteDAO{
         saveVote(vote);
     }
 
-    @Override
     public void deleteVote(Long id) {
         Optional<Vote> voteMaybe = getVoteById(id);
         if(voteMaybe.isEmpty()){
@@ -66,7 +62,7 @@ public class VoteDAOImpl implements VoteDAO{
         em.getTransaction().commit();
     }
 
-    @Override
+
     public Optional<Poll> getPollFromVoteId(Long id) {
         try{
             Query q = em.createQuery("select v.poll from Vote v where v.id=:id");

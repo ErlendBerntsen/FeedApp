@@ -1,6 +1,7 @@
 package no.hvl.dat250.jpa.basicexample.services;
 
 import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
+import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class UserService {
         return userDAO.save(user);
     }
 
-    public UserClass updateUser(Long id, UserClass updatedUser){
+    public UserClass updateUser(Long id, UserDTO updatedUser){
         var user = getUser(id);
         if(user.isPresent()){
             var userToUpdate = user.get();
@@ -40,7 +41,7 @@ public class UserService {
             userToUpdate.setUserType(updatedUser.getUserType());
             return userToUpdate;
         }else{
-            return createUser(updatedUser);
+            return createUser(updatedUser.convertToEntity());
         }
     }
 

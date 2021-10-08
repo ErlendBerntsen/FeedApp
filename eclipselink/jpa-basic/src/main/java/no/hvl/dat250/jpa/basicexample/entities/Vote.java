@@ -1,31 +1,28 @@
 package no.hvl.dat250.jpa.basicexample.entities;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.annotation.ObjectIdResolver;
 import lombok.Data;
 import no.hvl.dat250.jpa.basicexample.VoteType;
+import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 
 import javax.persistence.*;
 
 @Entity
 @Data
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", resolver = ObjectIdResolver.class)
 public class Vote {
     @Id
     @GeneratedValue
-    Long  id;
+    private Long  id;
 
-    String optionChosen;
+    private String optionChosen;
 
     @Enumerated(EnumType.STRING)
-    VoteType voteType;
+    private VoteType voteType;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
-    UserClass voter;
+    private UserClass voter;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    Poll poll;
+    private Poll poll;
 
     public Vote(){
     }
@@ -48,6 +45,16 @@ public class Vote {
     public void removePoll(){
         this.poll.getVotes().remove(this);
         setPoll(null);
+    }
+
+    public VoteDTO convertToDTO(){
+        var voter = this.voter == null? null : this.voter.getId();
+        var poll = this.poll == null? null : this.poll.getId();
+        return new VoteDTO(this.id,
+                this.optionChosen,
+                this.voteType,
+                voter,
+                poll);
     }
 
     @Override

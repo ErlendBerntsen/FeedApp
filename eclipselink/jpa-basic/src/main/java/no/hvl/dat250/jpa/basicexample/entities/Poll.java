@@ -1,9 +1,7 @@
 package no.hvl.dat250.jpa.basicexample.entities;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.annotation.ObjectIdResolver;
 import lombok.Data;
+import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -14,28 +12,29 @@ import java.util.Random;
 
 @Entity
 @Data
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", resolver = ObjectIdResolver.class)
 public class Poll {
     @Id
     @GeneratedValue
-    Long id;
-    String question;
+    private Long id;
+    private String question;
 
     /*
         String format for Timestamp: "yyyy-mm-dd hh:mm:ss.f..."
         The fractional portion of timestamp constants (.f...) can be omitted.
         For example: Timestamp timestamp = Timestamp.valueOf("2020-09-20 12:00:00")
      */
-    Timestamp votingStart;
-    Timestamp votingEnd;
-    Boolean isPrivate;
-    Integer code;
+    private Timestamp votingStart;
+    private Timestamp votingEnd;
+    private Boolean isPrivate;
+    private Integer code;
+
 
     @ManyToOne(cascade = CascadeType.PERSIST)
-    UserClass creator;
+    private UserClass creator;
+
 
     @OneToMany (mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Vote> votes = new ArrayList<>();
+    private List<Vote> votes = new ArrayList<>();
 
     public Poll(){
         generateCode();
@@ -59,6 +58,20 @@ public class Poll {
         setCreator(null);
     }
 
+    public PollDTO convertToDTO(){
+        List<Long> votesId = new ArrayList<>();
+        votes.forEach(vote -> votesId.add(vote.getId()));
+        var creator = this.creator == null? null : this.creator.getId();
+        return new PollDTO(this.id,
+                this.question,
+                this.votingStart,
+                this.votingEnd,
+                this.isPrivate,
+                this.code,
+                creator,
+                votesId);
+    }
+
     @Override
     public String toString(){
         return ("id: " + id +
@@ -74,6 +87,7 @@ public class Poll {
         if(creator == null)return "";
         return creator.getUserStringWithoutPollsAndVotes();
     }
+
     @Override
     public int hashCode(){
         return Objects.hash(question);

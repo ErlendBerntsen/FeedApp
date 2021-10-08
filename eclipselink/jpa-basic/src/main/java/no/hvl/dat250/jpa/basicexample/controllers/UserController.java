@@ -1,5 +1,6 @@
 package no.hvl.dat250.jpa.basicexample.controllers;
 
+import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import no.hvl.dat250.jpa.basicexample.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,30 +26,32 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserClass> getAllUsers(){
-        return userService.getAllUsers();
+    public List<UserDTO> getAllUsers(){
+        List<UserDTO> allUsersDTO = new ArrayList<>();
+        userService.getAllUsers().forEach(user -> allUsersDTO.add(user.convertToDTO()));
+        return allUsersDTO;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUser(@PathVariable Long id){
         var user = userService.getUser(id);
         if(user.isPresent()){
-            return new ResponseEntity<>(user.get(), HttpStatus.OK);
+            return new ResponseEntity<>(user.get().convertToDTO(), HttpStatus.OK);
         }
         return new ResponseEntity<>("Couldn't find user with id " + id, HttpStatus.NOT_FOUND);
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody UserClass userClass){
-        var user = userService.createUser(userClass);
-        return ResponseEntity.created(URI.create("/users/" + user.getId())).build();
+    public ResponseEntity<?> createUser(@RequestBody UserDTO user){
+        var newUser = userService.createUser(user.convertToEntity());
+        return ResponseEntity.created(URI.create("/users/" + newUser.getId())).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserClass> updateUser(@PathVariable Long id, @RequestBody UserClass userClass){
-        var user = userService.updateUser(id, userClass);
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDTO updatedUser){
+        var user = userService.updateUser(id, updatedUser);
         if(id.equals(user.getId())){
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(user.convertToDTO());
         }else{
             return ResponseEntity.created(URI.create("/users/" + user.getId())).build();
         }
