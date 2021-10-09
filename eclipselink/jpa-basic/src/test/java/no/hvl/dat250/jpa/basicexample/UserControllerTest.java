@@ -1,9 +1,7 @@
 package no.hvl.dat250.jpa.basicexample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
-import no.hvl.dat250.jpa.basicexample.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,9 +24,6 @@ public class UserControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private UserService userService;
 
 
     @Test
