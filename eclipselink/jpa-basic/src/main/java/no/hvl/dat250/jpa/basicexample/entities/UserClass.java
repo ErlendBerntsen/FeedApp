@@ -14,6 +14,7 @@ import java.util.Objects;
 @Entity
 @Data
 public class UserClass {
+    @JsonIgnore
     @Id
     @GeneratedValue
     private Long id;
@@ -27,11 +28,17 @@ public class UserClass {
     @OneToMany(mappedBy = "creator", cascade = CascadeType.PERSIST)
     private List<Poll> createdPolls = new ArrayList<>();
 
-    @JsonIgnore//TODO:??????????????????????????????????????????????????????????????
+
     @OneToMany(mappedBy = "voter", cascade = CascadeType.PERSIST)
     private List<Vote> votes = new ArrayList<>();
 
     public UserClass(){}
+
+    public UserClass(String username, String pass, UserType userType) {
+        this.username = username;
+        this.password = pass;
+        this.userType = userType;
+    }
 
     public Vote voteOnPoll(Poll poll, String option, VoteType voteType){
         Vote vote = new Vote();
