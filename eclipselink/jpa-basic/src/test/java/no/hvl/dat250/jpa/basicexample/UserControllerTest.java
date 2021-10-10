@@ -10,8 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -39,6 +38,34 @@ public class UserControllerTest {
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void updateUserGivesStatusOk() throws Exception {
+        UserClass user = new UserClass("Espen", "asd123", UserType.REGULAR);
+        String userURL = mockMvc.perform(post("/users")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(user)))
+            .andReturn().getResponse().getRedirectedUrl();
+
+        user.setUsername("Askeladd");
+
+        mockMvc.perform(put(userURL)
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteUserGivesStatusOK() throws Exception {
+        UserClass user = new UserClass("Espen", "asd123", UserType.REGULAR);
+        String userURL = mockMvc.perform(post("/users")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(user)))
+            .andReturn().getResponse().getRedirectedUrl();
+
+        mockMvc.perform(delete(userURL))
+            .andExpect(status().isOk());
     }
 
 
