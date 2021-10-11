@@ -1,7 +1,6 @@
 package no.hvl.dat250.jpa.basicexample.controllers;
 
 import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
-import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import no.hvl.dat250.jpa.basicexample.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

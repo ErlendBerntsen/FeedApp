@@ -2,9 +2,6 @@ package no.hvl.dat250.jpa.basicexample.controllers;
 
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
-import no.hvl.dat250.jpa.basicexample.entities.Poll;
-import no.hvl.dat250.jpa.basicexample.entities.UserClass;
-import no.hvl.dat250.jpa.basicexample.entities.Vote;
 import no.hvl.dat250.jpa.basicexample.services.PollService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/polls")

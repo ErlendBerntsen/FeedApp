@@ -49,5 +49,9 @@ public class UserService {
         userDAO.deleteById(id);
     }
 
+    public void deleteAllUsers(){
+        userDAO.deleteAll();
+    }
+
 
 }

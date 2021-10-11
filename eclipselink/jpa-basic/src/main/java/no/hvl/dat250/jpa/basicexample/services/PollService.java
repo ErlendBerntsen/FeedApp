@@ -7,13 +7,12 @@ import no.hvl.dat250.jpa.basicexample.dao.VoteDAO;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
-import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import no.hvl.dat250.jpa.basicexample.entities.Vote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.NoResultException;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +60,10 @@ public class PollService {
 
     public void deletePoll(Long id) {
         pollDao.deleteById(id);
+    }
+
+    public void deleteAllPolls(){
+        pollDao.deleteAll();
     }
 
     public Optional<List<Vote>> getAllVotes(Long id){
