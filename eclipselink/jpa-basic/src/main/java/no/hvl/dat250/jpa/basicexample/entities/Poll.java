@@ -5,10 +5,7 @@ import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 @Entity
 @Data

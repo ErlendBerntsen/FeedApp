@@ -1,5 +1,6 @@
 package no.hvl.dat250.jpa.basicexample.services;
 
+import no.hvl.dat250.jpa.basicexample.VoteType;
 import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
@@ -46,12 +47,16 @@ public class UserService {
     }
 
     public void deleteUser(Long id){
-        userDAO.deleteById(id);
+        var userMaybe = getUser(id);
+        if(userMaybe.isPresent()){
+            var user = userMaybe.get();
+            user.getCreatedPolls().forEach(poll -> poll.setCreator(null));
+            user.getVotes().forEach(vote -> {
+                vote.setVoter(null);
+                vote.setVoteType(VoteType.GUEST);
+            });
+            userDAO.deleteById(id);
+        }
     }
-
-    public void deleteAllUsers(){
-        userDAO.deleteAll();
-    }
-
 
 }

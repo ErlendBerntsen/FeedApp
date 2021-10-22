@@ -59,11 +59,12 @@ public class PollService {
     }
 
     public void deletePoll(Long id) {
-        pollDao.deleteById(id);
-    }
-
-    public void deleteAllPolls(){
-        pollDao.deleteAll();
+        var pollMaybe = getPoll(id);
+        if(pollMaybe.isPresent()){
+            var poll = pollMaybe.get();
+            poll.removeCreator();
+            pollDao.deleteById(id);
+        }
     }
 
     public Optional<List<Vote>> getAllVotes(Long id){
