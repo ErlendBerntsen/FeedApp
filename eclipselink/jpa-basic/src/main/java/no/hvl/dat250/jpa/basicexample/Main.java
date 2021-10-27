@@ -1,5 +1,6 @@
 package no.hvl.dat250.jpa.basicexample;
 
+
 import no.hvl.dat250.jpa.basicexample.dao.*;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
@@ -80,8 +81,6 @@ public class Main {
             guestVote.setVoteType(VoteType.GUEST);
             guestVote.setOptionChosen("no");
             guestVote.addPoll(poll2);
-
-
 
             userDAO.save(user1);
             userDAO.save(user2);
