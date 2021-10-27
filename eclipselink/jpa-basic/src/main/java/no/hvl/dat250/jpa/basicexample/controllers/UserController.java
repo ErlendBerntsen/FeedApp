@@ -1,5 +1,6 @@
 package no.hvl.dat250.jpa.basicexample.controllers;
 
+import no.hvl.dat250.jpa.basicexample.dto.CredentialsDTO;
 import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 import no.hvl.dat250.jpa.basicexample.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ public class UserController {
 
 
     private final UserService userService;
+
 
     @Autowired
     public UserController(UserService userService){
@@ -41,8 +43,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody UserDTO user){
-        var newUser = userService.createUser(user.convertToEntity());
+    public ResponseEntity<?> createUser(@RequestBody CredentialsDTO credentials){
+        var newUser = userService.createUser(credentials.convertToUserEntity());
         return ResponseEntity.created(URI.create("/users/" + newUser.getId())).build();
     }
 

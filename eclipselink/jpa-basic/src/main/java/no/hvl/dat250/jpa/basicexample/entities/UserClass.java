@@ -4,12 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.hvl.dat250.jpa.basicexample.UserType;
 import no.hvl.dat250.jpa.basicexample.VoteType;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static no.hvl.dat250.jpa.basicexample.UserType.*;
 
 @Entity
 @Data
@@ -19,11 +23,15 @@ public class UserClass {
     @GeneratedValue
     private Long id;
 
-    private String username;
-    private String password;
+
+    @Convert(converter = UsernameConverter.class)
+    private Username username;
+
+    @Convert(converter = PasswordConverter.class)
+    private Password password;
 
     @Enumerated(value = EnumType.STRING)
-    private UserType userType;
+    private UserType userType = REGULAR;
 
     @OneToMany(mappedBy = "creator", cascade = CascadeType.PERSIST)
     private List<Poll> createdPolls = new ArrayList<>();
@@ -34,9 +42,9 @@ public class UserClass {
 
     public UserClass(){}
 
-    public UserClass(String username, String pass, UserType userType) {
+    public UserClass(Username username, Password password, UserType userType) {
         this.username = username;
-        this.password = pass;
+        this.password = password;
         this.userType = userType;
     }
 
@@ -88,5 +96,31 @@ public class UserClass {
     @Override
     public int hashCode(){
         return Objects.hash(username);
+    }
+}
+
+class UsernameConverter implements AttributeConverter<Username, String>{
+
+    @Override
+    public String convertToDatabaseColumn(Username username) {
+        return username.getUsername();
+    }
+
+    @Override
+    public Username convertToEntityAttribute(String username) {
+        return new Username(username);
+    }
+}
+
+class PasswordConverter implements AttributeConverter<Password, String>{
+
+    @Override
+    public String convertToDatabaseColumn(Password password) {
+        return password.getPassword();
+    }
+
+    @Override
+    public Password convertToEntityAttribute(String password) {
+        return new Password(password);
     }
 }
