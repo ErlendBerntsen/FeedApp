@@ -50,7 +50,7 @@ public class Poll {
     }
 
     public void removeCreator(){
-        assert(this.creator != null);
+        if(this.creator == null)return;
         this.creator.getCreatedPolls().remove(this);
         setCreator(null);
     }

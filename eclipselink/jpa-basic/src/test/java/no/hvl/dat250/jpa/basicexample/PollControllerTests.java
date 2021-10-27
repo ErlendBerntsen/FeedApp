@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Timestamp;
 
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -85,7 +86,7 @@ public class PollControllerTests {
             .andReturn().getResponse().getRedirectedUrl();
 
         mockMvc.perform(delete(pollURL))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
 

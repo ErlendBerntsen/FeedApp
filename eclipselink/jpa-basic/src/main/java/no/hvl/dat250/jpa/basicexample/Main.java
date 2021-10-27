@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 
 @SpringBootApplication
 public class Main {
-    public static final String PERSISTENCE_UNIT_NAME = "votingsystem";
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {

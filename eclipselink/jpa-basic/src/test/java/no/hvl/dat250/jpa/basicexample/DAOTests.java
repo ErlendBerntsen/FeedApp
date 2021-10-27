@@ -8,9 +8,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +20,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class DAOTests {
 
     @Autowired
@@ -26,7 +29,14 @@ public class DAOTests {
     @Autowired
     private PollDAO pollDAO;
 
+
+    @Autowired
+    private VoteDAO voteDAO;
+
     private UserClass user;
+
+    private Poll poll;
+    private Vote vote;
 
     @Before
     public void setUp() {
@@ -34,6 +44,17 @@ public class DAOTests {
         user.setUsername("TestUser1");
         user.setPassword("123");
         user.setUserType(UserType.REGULAR);
+
+        poll = new Poll ();
+        poll.setIsPrivate(false);
+        poll.setQuestion("Lorem ipsum?");
+        poll.setVotingStart(Timestamp.valueOf("2020-09-20 00:00:00"));
+        poll.setVotingEnd(Timestamp.valueOf("2020-09-30 00:00:00"));
+        poll.setCode(123);
+
+        vote = new Vote ();
+        vote.setVoteType(VoteType.USER);
+        vote.setOptionChosen("yes");
 
         pollDAO.deleteAll();
         userDAO.deleteAll();
@@ -96,6 +117,73 @@ public class DAOTests {
         Optional<UserClass> userMaybe = userDAO.findByUsernameAndPassword(user.getUsername(), "");
         assertFalse(userMaybe.isPresent());
     }
+
+
+    @Test
+    public void shouldCreatePollInDatabase(){
+        pollDAO.save(poll);
+        Optional<Poll> pollMaybe = pollDAO.findById(poll.getId());
+        assertTrue(pollMaybe.isPresent());
+        assertEquals(poll, pollMaybe.get());
+    }
+
+    @Test
+    public void shouldCreateVoteInDatabase(){
+        voteDAO.save(vote);
+        Optional<Vote> voteMaybe = voteDAO.findById(vote.getId());
+        assertTrue(voteMaybe.isPresent());
+        assertEquals(vote, voteMaybe.get());
+    }
+
+    @Test
+    public void shouldCreateBidirectionalRelationBetweenUserAndPoll(){
+        poll.addCreator(user);
+        assertEquals(poll.getCreator().getId(), user.getId());
+        assertEquals(user.getCreatedPolls().get(0).getId(), poll.getId() );
+    }
+
+    @Test
+    public void shouldCreateUserForeignKeyInPollTable(){
+        poll.addCreator(user);
+        userDAO.save(user);
+        pollDAO.save(poll);
+        UserClass creator = pollDAO.getById(poll.getId()).getCreator();
+        assertEquals(creator.getId(), user.getId());
+    }
+
+
+    @Test
+    public void shouldCreateBidirectionalRelationBetweenPollAndVote(){
+        vote.addPoll(poll);
+        assertEquals(vote.getPoll().getId(), poll.getId());
+        assertEquals(poll.getVotes().get(0).getId(), vote.getId() );
+    }
+
+    @Test
+    public void shouldCreatePollForeignKeyInVoteTable(){
+        vote.addPoll(poll);
+        pollDAO.save(poll); //This also persists the vote
+        assertTrue(voteDAO.findById(vote.getId()).isPresent());
+        Poll p = voteDAO.findById(vote.getId()).get().getPoll();
+        assertEquals(p.getId(), poll.getId());
+    }
+
+    @Test
+    public void shouldCreateBidirectionalRelationBetweenUserAndVote(){
+        vote.addVoter(user);
+        assertEquals(vote.getVoter().getId(), user.getId());
+        assertEquals(user.getVotes().get(0).getId(), vote.getId());
+    }
+
+    @Test
+    public void shouldCreateUserForeignKeyInVoteTable(){
+        vote.addVoter(user);
+        userDAO.save(user); //This also persists the vote
+        assertTrue(voteDAO.findById(vote.getId()).isPresent());
+        UserClass voter = voteDAO.findById(vote.getId()).get().getVoter();
+        assertEquals(voter.getId(), user.getId());
+    }
+    
 
     @Test
     public void onlyPublicPollsShouldBeRetrieved(){
