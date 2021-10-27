@@ -1,6 +1,8 @@
 package no.hvl.dat250.jpa.basicexample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.junit.jupiter.api.Test;
@@ -20,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class PollControllerTests {
+class PollControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,7 +38,7 @@ public class PollControllerTests {
 
     @Test
     void createPollGivesStatusIsCreated() throws Exception {
-        UserClass creator = new UserClass("Espen", "foobar", UserType.REGULAR);
+        UserClass creator = new UserClass(new Username("Espen"), new Password("foobar123"), UserType.REGULAR);
         Poll poll = new Poll ();
         poll.setIsPrivate(false);
         poll.setQuestion("What is the meaning of life?");

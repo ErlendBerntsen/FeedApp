@@ -1,5 +1,6 @@
 package no.hvl.dat250.jpa.basicexample.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 
@@ -33,14 +34,18 @@ public class Poll {
     @OneToMany (mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vote> votes = new ArrayList<>();
 
+    @Transient
+    @JsonIgnore
+    Random random = new Random();
+
+
     public Poll(){
         generateCode();
     }
 
     private void generateCode(){
-        Random random = new Random();
-        int upperbound = 1000000;
-        int lowerbound = 100000;
+        var upperbound = 1000000;
+        var lowerbound = 100000;
         setCode(random.nextInt(upperbound-lowerbound)+lowerbound);
     }
 
@@ -58,14 +63,14 @@ public class Poll {
     public PollDTO convertToDTO(){
         List<Long> votesId = new ArrayList<>();
         votes.forEach(vote -> votesId.add(vote.getId()));
-        var creator = this.creator == null? null : this.creator.getId();
+        var pollCreator = creator == null? null : creator.getId();
         return new PollDTO(this.id,
                 this.question,
                 this.votingStart,
                 this.votingEnd,
                 this.isPrivate,
                 this.code,
-                creator,
+                pollCreator,
                 votesId);
     }
 

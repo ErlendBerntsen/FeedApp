@@ -1,6 +1,8 @@
 package no.hvl.dat250.jpa.basicexample;
 
 import no.hvl.dat250.jpa.basicexample.dao.*;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import no.hvl.dat250.jpa.basicexample.entities.Vote;
@@ -41,8 +43,8 @@ public class DAOTests {
     @Before
     public void setUp() {
         user = new UserClass();
-        user.setUsername("TestUser1");
-        user.setPassword("123");
+        user.setUsername(new Username("TestUser1"));
+        user.setPassword(new Password("password123"));
         user.setUserType(UserType.REGULAR);
 
         poll = new Poll ();
@@ -77,8 +79,8 @@ public class DAOTests {
     @Test
     public void allUsersShouldBeFoundInDatabase(){
         UserClass user2 = new UserClass();
-        user2.setUsername("TestUser2");
-        user2.setPassword("456");
+        user2.setUsername(new Username("TestUser2"));
+        user2.setPassword(new Password("password456"));
         user2.setUserType(UserType.ADMIN);
         userDAO.save(user);
         userDAO.save(user2);
@@ -94,28 +96,6 @@ public class DAOTests {
         assertTrue(userDAO.findById(user.getId()).isPresent());
         userDAO.deleteById(user.getId());
         assertFalse(userDAO.findById(user.getId()).isPresent());
-    }
-
-    @Test
-    public void userShouldBeFoundByUsernameAndPasswordInDatabase(){
-        userDAO.save(user);
-        Optional<UserClass> userMaybe = userDAO.findByUsernameAndPassword(user.getUsername(), user.getPassword());
-        assertTrue(userMaybe.isPresent());
-        assertEquals(user.getId(), userMaybe.get().getId());
-    }
-
-    @Test
-    public void userShouldNotBeFoundWithWrongUsername(){
-        userDAO.save(user);
-        Optional<UserClass> userMaybe = userDAO.findByUsernameAndPassword("", user.getPassword());
-        assertFalse(userMaybe.isPresent());
-    }
-
-    @Test
-    public void userShouldNotBeFoundWithWrongPassword(){
-        userDAO.save(user);
-        Optional<UserClass> userMaybe = userDAO.findByUsernameAndPassword(user.getUsername(), "");
-        assertFalse(userMaybe.isPresent());
     }
 
 

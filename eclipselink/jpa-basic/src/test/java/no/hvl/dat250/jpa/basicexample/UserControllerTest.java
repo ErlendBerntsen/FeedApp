@@ -1,7 +1,11 @@
 package no.hvl.dat250.jpa.basicexample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
+import no.hvl.dat250.jpa.basicexample.dto.CredentialsDTO;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +28,7 @@ public class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    CredentialsDTO user = new CredentialsDTO(new Username("Espen"),new Password("password123"));
 
     @Test
     void getAllUsersGivesStatusOK() throws Exception {
@@ -33,7 +38,6 @@ public class UserControllerTest {
 
     @Test
     void createUserGivesStatusIsCreated() throws Exception {
-        UserClass user = new UserClass("Espen", "asd123", UserType.REGULAR);
         mockMvc.perform(post("/users")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(user)))
@@ -42,23 +46,21 @@ public class UserControllerTest {
 
     @Test
     void updateUserGivesStatusOk() throws Exception {
-        UserClass user = new UserClass("Espen", "asd123", UserType.REGULAR);
         String userURL = mockMvc.perform(post("/users")
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(user)))
             .andReturn().getResponse().getRedirectedUrl();
-
-        user.setUsername("Askeladd");
+        UserClass userEntity = user.convertToUserEntity();
+        userEntity.setUsername(new Username("Askeladd"));
 
         mockMvc.perform(put(userURL)
             .contentType("application/json")
-            .content(objectMapper.writeValueAsString(user)))
+            .content(objectMapper.writeValueAsString(userEntity)))
             .andExpect(status().isOk());
     }
 
     @Test
     void deleteUserGivesStatusOK() throws Exception {
-        UserClass user = new UserClass("Espen", "asd123", UserType.REGULAR);
         String userURL = mockMvc.perform(post("/users")
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(user)))

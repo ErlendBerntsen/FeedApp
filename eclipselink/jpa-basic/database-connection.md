@@ -8,7 +8,7 @@ name and the owner. If you want create a new user to be the owner you can right 
 again in the same  place -> Create -> Login/Group role and specify username, password
 and the permissions of that user. 
 
-Go to IntelliJ -> Run -> Edit Configurations
+Go to IntelliJ -> Run -> Edit Configurations and find the Spring Boot template
 
 Under "Environment variables" paste this line:
 
@@ -17,5 +17,8 @@ DATABASE_URL=your_db_url;DATABASE_USERNAME=your_db_username;DATABASE_PASSWORD=yo
 Replace the "your_db..." values with your actual values that you created in pgAdmin.
 
 The database url probably has a form of jdbc:postgresql://localhost:5432/databasename
+
+Click apply then ok and do the same for the JUnit template (you may need to manually
+edit preexisting configurations of tests you've ran previously)
 
 Now when you run the program it should have a local database connection
