@@ -1,6 +1,7 @@
 package no.hvl.dat250.jpa.basicexample.security;
 
 import no.hvl.dat250.jpa.basicexample.auth.ApplicationUserService;
+import no.hvl.dat250.jpa.basicexample.jwt.JwtTokenVerifier;
 import no.hvl.dat250.jpa.basicexample.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +35,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
+                .addFilterAfter(new JwtTokenVerifier(), JwtUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/users/**", "/poll/**").permitAll()
