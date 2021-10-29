@@ -65,7 +65,8 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 "GET",
                 "POST",
                 "PUT",
-                "DELETE"
+                "DELETE",
+                "OPTIONS"
         ));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
