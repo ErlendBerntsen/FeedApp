@@ -25,7 +25,8 @@ public class ApplicationUserService implements UserDetailsService {
                 .orElseThrow(() ->
                         new UsernameNotFoundException(String.format("Username %s not found", username)));
 
-        return new ApplicationUser(user.getUsername().getUsername(),
+        return new ApplicationUser(user.getId(),
+                user.getUsername().getUsername(),
                 user.getPassword().getPassword(),
                 user.getUserType().getGrantedAuthorities(),
                 true ,

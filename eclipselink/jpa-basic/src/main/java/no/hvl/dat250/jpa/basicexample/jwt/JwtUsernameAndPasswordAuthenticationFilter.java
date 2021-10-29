@@ -3,9 +3,11 @@ package no.hvl.dat250.jpa.basicexample.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.dto.CredentialsDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,7 +27,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
     private final AuthenticationManager authenticationManager;
 
-
+    @Autowired
     public JwtUsernameAndPasswordAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
@@ -65,8 +67,10 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                 .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(10)))
                 .signWith(Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8)))
                 .compact();
-
         response.addHeader("Authorization", "Bearer " + token);
+
+        String userData = new ObjectMapper().writeValueAsString(authResult.getPrincipal());
+        response.getWriter().write(userData);
     }
 
 }
