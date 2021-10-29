@@ -12,7 +12,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000", "https://react-heroku-deploy-test.herokuapp.com"})
 @RequestMapping("/users")
 @RestController
 public class UserController {
