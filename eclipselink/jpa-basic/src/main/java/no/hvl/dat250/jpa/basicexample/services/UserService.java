@@ -2,9 +2,11 @@ package no.hvl.dat250.jpa.basicexample.services;
 
 import no.hvl.dat250.jpa.basicexample.VoteType;
 import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +17,12 @@ import java.util.Optional;
 @Transactional
 public class UserService {
     private final UserDAO userDAO;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserDAO userDAO){
+    public UserService(UserDAO userDAO, PasswordEncoder passwordEncoder){
         this.userDAO = userDAO;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UserClass> getAllUsers(){
@@ -30,6 +34,9 @@ public class UserService {
     }
 
     public UserClass createUser(UserClass user){
+        //TODO maybe handle this somewhere else?
+        Password encrypted = new Password(passwordEncoder.encode(user.getPassword().getPassword()));
+        user.setPassword(encrypted);
         return userDAO.save(user);
     }
 

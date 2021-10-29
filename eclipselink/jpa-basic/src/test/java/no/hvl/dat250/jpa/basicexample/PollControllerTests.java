@@ -1,6 +1,8 @@
 package no.hvl.dat250.jpa.basicexample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.junit.jupiter.api.Test;
@@ -13,13 +15,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Timestamp;
 
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class PollControllerTests {
+class PollControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,7 +38,7 @@ public class PollControllerTests {
 
     @Test
     void createPollGivesStatusIsCreated() throws Exception {
-        UserClass creator = new UserClass("Espen", "foobar", UserType.REGULAR);
+        UserClass creator = new UserClass(new Username("Espen"), new Password("foobar123"), UserType.REGULAR);
         Poll poll = new Poll ();
         poll.setIsPrivate(false);
         poll.setQuestion("What is the meaning of life?");
@@ -85,7 +88,7 @@ public class PollControllerTests {
             .andReturn().getResponse().getRedirectedUrl();
 
         mockMvc.perform(delete(pollURL))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
 
