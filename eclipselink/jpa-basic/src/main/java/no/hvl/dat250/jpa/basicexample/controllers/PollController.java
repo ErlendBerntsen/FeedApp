@@ -6,6 +6,8 @@ import no.hvl.dat250.jpa.basicexample.services.PollService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -46,6 +48,7 @@ public class PollController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated() and @pollService.isCreator(#id, authentication.principal.getId())")
     public ResponseEntity<?> updatePoll(@PathVariable Long id, @RequestBody PollDTO updatedPoll){
         var poll = pollService.updatePoll(id, updatedPoll);
         if(id.equals(poll.getId())){
@@ -56,6 +59,7 @@ public class PollController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated() and @pollService.isCreator(#id, authentication.principal.getId())")
     public ResponseEntity<?> deletePoll(@PathVariable Long id){
         if(pollService.getPoll(id).isEmpty()){
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);

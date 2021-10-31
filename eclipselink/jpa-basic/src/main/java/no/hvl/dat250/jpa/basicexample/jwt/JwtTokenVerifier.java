@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import no.hvl.dat250.jpa.basicexample.UserType;
+import no.hvl.dat250.jpa.basicexample.auth.UsernameIdPrincipal;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -49,13 +50,14 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
             Claims body = jwsClaims.getBody();
             String username = body.getSubject();
+            Long id  = Integer.toUnsignedLong((Integer)body.get("id"));
 
             //TODO make this depend on the users authorities
             Set<SimpleGrantedAuthority> simpleGrantedAuthorities = UserType.REGULAR.getGrantedAuthorities();
-
+            UsernameIdPrincipal principal = new UsernameIdPrincipal(id, username);
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    username,
-                    null, //Should this be null? Who knows
+                    principal,
+                    null,
                     simpleGrantedAuthorities
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);

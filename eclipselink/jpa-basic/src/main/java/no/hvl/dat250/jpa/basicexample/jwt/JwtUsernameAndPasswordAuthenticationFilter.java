@@ -3,6 +3,7 @@ package no.hvl.dat250.jpa.basicexample.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import no.hvl.dat250.jpa.basicexample.auth.ApplicationUser;
 import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
@@ -22,12 +23,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
 
-    @Autowired
     public JwtUsernameAndPasswordAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
@@ -60,16 +62,19 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                                             FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
 
+
+        ApplicationUser authenticatedUser = (ApplicationUser) authResult.getPrincipal();
         String key = "makethismoresecureyouabsolutedumbmonkeyomgnowigotabugsincethiswasntstrongenoughwowgreatjob";
         String token = Jwts.builder()
                 .setSubject(authResult.getName())
+                .addClaims(Map.of("id", authenticatedUser.getId()))
                 .setIssuedAt(new Date())
                 .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(10)))
                 .signWith(Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8)))
                 .compact();
         response.addHeader("Authorization", "Bearer " + token);
 
-        String userData = new ObjectMapper().writeValueAsString(authResult.getPrincipal());
+        String userData = new ObjectMapper().writeValueAsString(authenticatedUser);
         response.getWriter().write(userData);
     }
 
