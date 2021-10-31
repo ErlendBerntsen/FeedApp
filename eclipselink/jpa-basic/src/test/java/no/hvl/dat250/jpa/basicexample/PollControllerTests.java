@@ -1,8 +1,10 @@
 package no.hvl.dat250.jpa.basicexample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
+import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,9 @@ class PollControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private UserDAO userDAO;
+
     @Test
     void getAllPollsGivesStatusOK() throws Exception {
         mockMvc.perform(get("/polls"))
@@ -39,12 +44,13 @@ class PollControllerTests {
     @Test
     void createPollGivesStatusIsCreated() throws Exception {
         UserClass creator = new UserClass(new Username("Espen"), new Password("foobar123"), UserType.REGULAR);
-        Poll poll = new Poll ();
+        userDAO.save(creator);
+        PollDTO poll = new PollDTO();
         poll.setIsPrivate(false);
         poll.setQuestion("What is the meaning of life?");
         poll.setVotingStart(Timestamp.valueOf("2021-09-20 00:00:00"));
         poll.setVotingEnd(Timestamp.valueOf("2021-09-30 00:00:00"));
-        //poll.addCreator(creator); //Todo: adding creator reults in infinite recursion
+        poll.setCreatorId(creator.getId());
 
         mockMvc.perform(post("/polls")
             .contentType("application/json")

@@ -1,12 +1,12 @@
 package no.hvl.dat250.jpa.basicexample.controllers;
 
+import no.hvl.dat250.jpa.basicexample.dto.Mapper;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 import no.hvl.dat250.jpa.basicexample.services.PollService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +19,12 @@ import java.util.List;
 public class PollController {
 
     private final PollService pollService;
+    private final Mapper mapper;
 
     @Autowired
-    public PollController(PollService pollService){
+    public PollController(PollService pollService, Mapper mapper){
         this.pollService = pollService;
+        this.mapper = mapper;
     }
 
     @GetMapping
@@ -43,7 +45,7 @@ public class PollController {
 
     @PostMapping
     public ResponseEntity<?> createPoll(@RequestBody PollDTO poll){
-        var newPoll = pollService.createPoll(poll.convertToEntity());
+        var newPoll = pollService.createPoll(mapper.convertPollToEntity(poll));
         return ResponseEntity.created(URI.create("/polls/" + newPoll.getId())).build();
     }
 
