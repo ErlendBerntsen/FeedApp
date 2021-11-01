@@ -47,6 +47,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody CredentialsDTO credentials){
+        //TODO check that the username isn't taken
         var newUser = userService.createUser(credentials.convertToUserEntity());
         return ResponseEntity.created(URI.create("/users/" + newUser.getId())).build();
     }
