@@ -6,20 +6,22 @@ import no.hvl.dat250.jpa.basicexample.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000", "https://react-heroku-deploy-test.herokuapp.com"})
 @RequestMapping("/users")
 @RestController
 public class UserController {
 
-
     private final UserService userService;
-
 
     @Autowired
     public UserController(UserService userService){
@@ -34,6 +36,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated() and authentication.principal.getId() == #id")
     public ResponseEntity<?> getUser(@PathVariable Long id){
         var user = userService.getUser(id);
         if(user.isPresent()){
@@ -44,11 +47,13 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody CredentialsDTO credentials){
+        //TODO check that the username isn't taken
         var newUser = userService.createUser(credentials.convertToUserEntity());
         return ResponseEntity.created(URI.create("/users/" + newUser.getId())).build();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated() and authentication.principal.getId() == #id")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDTO updatedUser){
         var user = userService.updateUser(id, updatedUser);
         if(id.equals(user.getId())){
@@ -59,6 +64,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated() and authentication.principal.getId() == #id")
     public ResponseEntity<?> deleteUser(@PathVariable Long id){
         if(userService.getUser(id).isEmpty()){
             return new ResponseEntity<>("Couldn't find user with id " + id, HttpStatus.NOT_FOUND);
@@ -67,3 +73,4 @@ public class UserController {
         return new ResponseEntity<>("Deleted user with id " + id, HttpStatus.OK);
     }
 }
+

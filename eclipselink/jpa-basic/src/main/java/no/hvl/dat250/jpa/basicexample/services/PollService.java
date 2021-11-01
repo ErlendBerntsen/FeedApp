@@ -116,4 +116,16 @@ public class PollService {
     public void deleteVote(Long voteId) {
         voteDao.deleteById(voteId);
     }
+
+    public boolean isCreator(Long pollId, Long userId){
+        var poll = getPoll(pollId);
+        if(poll.isEmpty()){
+            return false;
+        }
+        var creator = poll.get().getCreator();
+        if(creator == null){
+            return false;
+        }
+        return userId.equals(creator.getId());
+    }
 }

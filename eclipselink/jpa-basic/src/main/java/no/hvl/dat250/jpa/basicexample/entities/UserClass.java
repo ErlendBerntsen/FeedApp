@@ -63,8 +63,8 @@ public class UserClass {
     @JsonIgnore
     public String getUserStringWithoutPollsAndVotes(){
         return  ("id: " + id +
-                ", username: " + username +
-                ", password: " + password +
+                ", username: " + username.getUsername() +
+                ", password: " + password.getPassword() +
                 ", userType: " + userType);
     }
 
@@ -85,8 +85,8 @@ public class UserClass {
     @Override
     public String toString(){
         return ("id: " + id +
-                ", username: " + username +
-                ", password: " + password +
+                ", username: " + username.getUsername() +
+                ", password: " + password.getPassword() +
                 ", userType: " + userType +
                 ", createdPolls: " + createdPolls.toString() +
                 ", votes: " + votes.toString());

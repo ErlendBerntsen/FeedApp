@@ -1,27 +1,30 @@
 package no.hvl.dat250.jpa.basicexample.controllers;
 
+import no.hvl.dat250.jpa.basicexample.dto.Mapper;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 import no.hvl.dat250.jpa.basicexample.services.PollService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000", "https://react-heroku-deploy-test.herokuapp.com"})
 @RestController
 @RequestMapping("/polls")
 public class PollController {
 
     private final PollService pollService;
+    private final Mapper mapper;
 
     @Autowired
-    public PollController(PollService pollService){
+    public PollController(PollService pollService, Mapper mapper){
         this.pollService = pollService;
+        this.mapper = mapper;
     }
 
     @GetMapping
@@ -42,11 +45,12 @@ public class PollController {
 
     @PostMapping
     public ResponseEntity<?> createPoll(@RequestBody PollDTO poll){
-        var newPoll = pollService.createPoll(poll.convertToEntity());
+        var newPoll = pollService.createPoll(mapper.convertPollToEntity(poll));
         return ResponseEntity.created(URI.create("/polls/" + newPoll.getId())).build();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated() and @pollService.isCreator(#id, authentication.principal.getId())")
     public ResponseEntity<?> updatePoll(@PathVariable Long id, @RequestBody PollDTO updatedPoll){
         var poll = pollService.updatePoll(id, updatedPoll);
         if(id.equals(poll.getId())){
@@ -57,6 +61,7 @@ public class PollController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated() and @pollService.isCreator(#id, authentication.principal.getId())")
     public ResponseEntity<?> deletePoll(@PathVariable Long id){
         if(pollService.getPoll(id).isEmpty()){
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);

@@ -50,6 +50,9 @@ public class Poll {
     }
 
     public void addCreator(UserClass user){
+        if(user == null){
+            return;
+        }
         this.creator = user;
         user.getCreatedPolls().add(this);
     }

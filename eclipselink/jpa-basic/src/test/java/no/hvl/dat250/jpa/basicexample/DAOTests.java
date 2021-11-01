@@ -91,6 +91,14 @@ public class DAOTests {
     }
 
     @Test
+    public void userShouldBeFoundByUsername(){
+        userDAO.save(user);
+        var userMaybe = userDAO.findByUsername(user.getUsername());
+        assertTrue(userMaybe.isPresent());
+        assertEquals(user, userMaybe.get());
+    }
+
+    @Test
     public void userShouldBeDeletedInDatabase(){
         userDAO.save(user);
         assertTrue(userDAO.findById(user.getId()).isPresent());
@@ -130,7 +138,6 @@ public class DAOTests {
         UserClass creator = pollDAO.getById(poll.getId()).getCreator();
         assertEquals(creator.getId(), user.getId());
     }
-
 
     @Test
     public void shouldCreateBidirectionalRelationBetweenPollAndVote(){
