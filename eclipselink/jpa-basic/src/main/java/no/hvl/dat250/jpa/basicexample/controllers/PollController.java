@@ -28,6 +28,7 @@ public class PollController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<PollDTO> getAllPolls(){
         List<PollDTO> allPollsDTO = new ArrayList<>();
         pollService.getAllPolls().forEach(poll -> allPollsDTO.add(poll.convertToDTO()));
@@ -44,13 +45,14 @@ public class PollController {
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createPoll(@RequestBody PollDTO poll){
         var newPoll = pollService.createPoll(mapper.convertPollToEntity(poll));
         return ResponseEntity.created(URI.create("/polls/" + newPoll.getId())).build();
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @pollService.isCreator(#id, authentication.principal.getId())")
+    @PreAuthorize("isAuthenticated() and (hasRole('ROLE_ADMIN') or @pollService.isCreator(#id, authentication.principal.getId()))")
     public ResponseEntity<?> updatePoll(@PathVariable Long id, @RequestBody PollDTO updatedPoll){
         var poll = pollService.updatePoll(id, updatedPoll);
         if(id.equals(poll.getId())){
@@ -61,7 +63,7 @@ public class PollController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @pollService.isCreator(#id, authentication.principal.getId())")
+    @PreAuthorize("isAuthenticated() and (hasRole('ROLE_ADMIN') or @pollService.isCreator(#id, authentication.principal.getId()))")
     public ResponseEntity<?> deletePoll(@PathVariable Long id){
         if(pollService.getPoll(id).isEmpty()){
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
@@ -71,6 +73,11 @@ public class PollController {
     }
 
 
+
+
+    /*
+    VOTE CONTROLLER METHODS
+     */
     @GetMapping("/{id}/votes")
     public ResponseEntity<?> getAllVotes(@PathVariable Long id){
         var votes = pollService.getAllVotes(id);
