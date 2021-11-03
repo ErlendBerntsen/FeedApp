@@ -8,6 +8,7 @@ import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.dto.CredentialsDTO;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
+import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -187,6 +189,61 @@ class PollControllerTests {
         assertTrue(pollDAO.findById(pollId).isEmpty());
     }
 
+    @Test
+    void getAllPublicPollsRequireNoAuthorization() throws Exception {
+     mockMvc.perform(get("/polls/?isPrivate=false"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getPollByCodeRequireNoAuthorization() throws Exception {
+        Poll poll = new Poll();
+        pollDAO.save(poll);
+        var code = poll.getCode();
+        mockMvc.perform(get("/polls/?code=" + code))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void authenticatedUserCanGetTheirOwnPolls() throws Exception {
+        var creator = createUser(credentials);
+        var poll = createPollDTO(creator);
+        createPollAndGetURL(poll, credentials);
+        String jwt = getJwtFromLoginRequest(credentials);
+        mockMvc.perform(get("/polls/?creator=" + creator.getId()).header("Authorization", jwt))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void adminCanGetPollsCreatedByOtherUser() throws Exception {
+        var creator = createUser(credentials);
+        var poll = createPollDTO(creator);
+        createPollAndGetURL(poll, credentials);
+        createUser(adminCredentials);
+        String jwt = getJwtFromLoginRequest(adminCredentials);
+        mockMvc.perform(get("/polls/?creator=" + creator.getId()).header("Authorization", jwt))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void authenticatedUserCanNotGetOtherUserPolls() throws Exception {
+        var creator = createUser(adminCredentials);
+        var poll = createPollDTO(creator);
+        createPollAndGetURL(poll, adminCredentials);
+        createUser(credentials);
+        String jwt = getJwtFromLoginRequest(credentials);
+        mockMvc.perform(get("/polls/?creator=" + creator.getId()).header("Authorization", jwt))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unauthenticatedUserCanNotGetOtherUserPolls() throws Exception {
+        var creator = createUser(adminCredentials);
+        var poll = createPollDTO(creator);
+        createPollAndGetURL(poll, adminCredentials);
+        mockMvc.perform(get("/polls/?creator=" + creator.getId()))
+                .andExpect(status().isForbidden());
+    }
 
 
     private String getJwtFromLoginRequest(CredentialsDTO credentials) throws Exception{

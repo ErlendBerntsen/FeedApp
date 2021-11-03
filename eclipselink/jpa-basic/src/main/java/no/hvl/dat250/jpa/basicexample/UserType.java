@@ -14,4 +14,8 @@ public enum UserType {
         grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
         return grantedAuthorities;
     }
+
+    public SimpleGrantedAuthority getRoleAuthority(){
+        return new SimpleGrantedAuthority("ROLE_" + this.name());
+    }
 }

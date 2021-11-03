@@ -35,6 +35,14 @@ public class PollService {
         return pollDao.findAll();
     }
 
+    public List<Poll> getAllPublicPolls() {
+        return pollDao.findByIsPrivate(false);
+    }
+
+    public Optional<Poll> getPollByCode(Integer code){
+        return pollDao.findByCode(code);
+    }
+
     public Optional<Poll> getPoll(long id) {
         return pollDao.findById(id);
     }

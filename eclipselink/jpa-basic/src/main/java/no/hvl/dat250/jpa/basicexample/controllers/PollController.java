@@ -1,38 +1,82 @@
 package no.hvl.dat250.jpa.basicexample.controllers;
 
+import no.hvl.dat250.jpa.basicexample.UserType;
+import no.hvl.dat250.jpa.basicexample.auth.UsernameIdPrincipal;
 import no.hvl.dat250.jpa.basicexample.dto.Mapper;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 import no.hvl.dat250.jpa.basicexample.services.PollService;
+import no.hvl.dat250.jpa.basicexample.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/polls")
 public class PollController {
 
     private final PollService pollService;
+    private final UserService userService;
     private final Mapper mapper;
 
     @Autowired
-    public PollController(PollService pollService, Mapper mapper){
+    public PollController(PollService pollService, UserService userService, Mapper mapper){
         this.pollService = pollService;
+        this.userService = userService;
         this.mapper = mapper;
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<PollDTO> getAllPolls(){
+    public ResponseEntity<?> getAllPolls(@RequestParam Optional<Boolean> isPrivate,
+                                         @RequestParam Optional<Integer> code,
+                                         @RequestParam Optional<Long> creator) {
         List<PollDTO> allPollsDTO = new ArrayList<>();
-        pollService.getAllPolls().forEach(poll -> allPollsDTO.add(poll.convertToDTO()));
-        return allPollsDTO;
+        if (isPrivate.isPresent() && Boolean.FALSE.equals(isPrivate.get())) {
+            pollService.getAllPublicPolls().forEach(poll -> allPollsDTO.add(poll.convertToDTO()));
+            return new ResponseEntity<>(allPollsDTO, HttpStatus.OK);
+        }
+
+        if(code.isPresent()){
+            var poll = pollService.getPollByCode(code.get());
+            if (poll.isPresent()) {
+                return new ResponseEntity<>(poll.get().convertToDTO(), HttpStatus.OK);
+            }
+            return new ResponseEntity<>("Could not find poll with code " + code.get(), HttpStatus.NOT_FOUND);
+        }
+
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(creator.isPresent()){
+            if(!"anonymousUser".equals(authentication.getName())){
+                var principal = (UsernameIdPrincipal) authentication.getPrincipal();
+                if(principal.getId().equals(creator.get())
+                        || authentication.getAuthorities().contains(UserType.ADMIN.getRoleAuthority())){
+                    var user = userService.getUser(creator.get());
+                    if(user.isPresent()){
+                        user.get().getCreatedPolls().forEach(poll -> allPollsDTO.add(poll.convertToDTO()));
+                        return new ResponseEntity<>(allPollsDTO, HttpStatus.OK);
+                    }else{
+                        return new ResponseEntity<>("Couldn't find user with id " + creator.get(), HttpStatus.NOT_FOUND);
+                    }
+                }
+            }
+            return new ResponseEntity<>("Unauthorized", HttpStatus.FORBIDDEN);
+        }
+
+        if (!"anonymousUser".equals(authentication.getName())
+                && authentication.getAuthorities().contains(UserType.ADMIN.getRoleAuthority())) {
+            pollService.getAllPolls().forEach(poll -> allPollsDTO.add(poll.convertToDTO()));
+            return new ResponseEntity<>(allPollsDTO, HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Unauthorized", HttpStatus.FORBIDDEN);
+
     }
 
     @GetMapping("/{id}")
