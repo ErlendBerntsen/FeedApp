@@ -118,10 +118,10 @@ public class PollController {
 
 
 
-
     /*
     VOTE CONTROLLER METHODS
      */
+
     @GetMapping("/{id}/votes")
     public ResponseEntity<?> getAllVotes(@PathVariable Long id){
         var votes = pollService.getAllVotes(id);

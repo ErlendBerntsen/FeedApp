@@ -1,5 +1,6 @@
 package no.hvl.dat250.jpa.basicexample.controllers;
 
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.dto.CredentialsDTO;
 import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 import no.hvl.dat250.jpa.basicexample.services.UserService;
@@ -7,12 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +27,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<UserDTO> getAllUsers(){
         List<UserDTO> allUsersDTO = new ArrayList<>();
         userService.getAllUsers().forEach(user -> allUsersDTO.add(user.convertToDTO()));
@@ -36,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and authentication.principal.getId() == #id")
+    @PreAuthorize("isAuthenticated() and (hasRole('ROLE_ADMIN') or authentication.principal.getId() == #id)")
     public ResponseEntity<?> getUser(@PathVariable Long id){
         var user = userService.getUser(id);
         if(user.isPresent()){
@@ -47,13 +46,16 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody CredentialsDTO credentials){
-        //TODO check that the username isn't taken
+        var userMaybe = userService.getUserByUsername(new Username(credentials.getUsername()));
+        if(userMaybe.isPresent()){
+            return new ResponseEntity<>("That username is already taken. Please choose another", HttpStatus.CONFLICT);
+        }
         var newUser = userService.createUser(credentials.convertToUserEntity());
         return ResponseEntity.created(URI.create("/users/" + newUser.getId())).build();
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and authentication.principal.getId() == #id")
+    @PreAuthorize("isAuthenticated() and (hasRole('ROLE_ADMIN') or authentication.principal.getId() == #id)")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDTO updatedUser){
         var user = userService.updateUser(id, updatedUser);
         if(id.equals(user.getId())){
@@ -64,7 +66,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and authentication.principal.getId() == #id")
+    @PreAuthorize("isAuthenticated() and (hasRole('ROLE_ADMIN') or authentication.principal.getId() == #id)")
     public ResponseEntity<?> deleteUser(@PathVariable Long id){
         if(userService.getUser(id).isEmpty()){
             return new ResponseEntity<>("Couldn't find user with id " + id, HttpStatus.NOT_FOUND);

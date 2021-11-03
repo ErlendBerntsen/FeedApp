@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -40,7 +41,10 @@ public class UserControllerTest {
     @Autowired
     private PollDAO pollDAO;
 
-    private final CredentialsDTO user = new CredentialsDTO(new Username("Espen"),new Password("password123"));
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private final CredentialsDTO userCredentials = new CredentialsDTO(new Username("Espen"),new Password("password123"));
 
     @BeforeEach
     void setUp(){
@@ -53,100 +57,96 @@ public class UserControllerTest {
     }
 
     @Test
-    void getAllUsersGivesStatusOK() throws Exception {
-        mockMvc.perform(get("/users"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void createUserGivesStatusIsCreated() throws Exception {
         mockMvc.perform(post("/users")
                 .contentType("application/json")
-                .content(objectMapper.writeValueAsString(user)))
+                .content(objectMapper.writeValueAsString(userCredentials)))
                 .andExpect(status().isCreated());
     }
 
     @Test
-    void successfulUserLoginShouldReturnJwt() throws Exception {
-        CredentialsDTO credentials = new CredentialsDTO(new Username("test"), new Password("password"));
+    void creatingUserWithTakenUsernameShouldGiveError() throws Exception {
+        createUser(userCredentials, false);
         mockMvc.perform(post("/users")
                 .contentType("application/json")
-                .content(objectMapper.writeValueAsString(credentials)));
+                .content(objectMapper.writeValueAsString(userCredentials)))
+                .andExpect(status().isConflict());
+    }
 
-        var result  = mockMvc.perform(post("/login")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(credentials)))
-                .andExpect(status().isOk())
-                .andReturn();
-        String jwt = result.getResponse().getHeader("Authorization");
+    @Test
+    void successfulUserLoginShouldReturnJwt() throws Exception {
+        createUser(userCredentials, false);
+        String jwt = getJwtFromLoginRequest(userCredentials);
         assertNotNull(jwt);
         assertTrue(jwt.startsWith("Bearer "));
     }
 
     @Test
-    void unsuccessfulUserLoginShouldReturnError() throws Exception {
-        CredentialsDTO credentials = new CredentialsDTO(new Username("tes"), new Password("password"));
-        var result  = mockMvc.perform(post("/login")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(credentials)))
-                .andExpect(status().isUnauthorized())
-                .andReturn();
-        String jwt = result.getResponse().getHeader("Authorization");
+    void unsuccessfulUserLoginShouldNotReturnJwt() throws Exception {
+        createUser(userCredentials, false);
+        CredentialsDTO credentials = new CredentialsDTO(new Username("tes"), new Password("passwordd"));
+        String jwt = getJwtFromLoginRequest(credentials);
         assertNull(jwt);
     }
 
-
     @Test
     void authenticatedUserShouldBeAbleToAccessTheirOwnInformation() throws Exception{
-        CredentialsDTO credentials = new CredentialsDTO(new Username("test"), new Password("password"));
-        mockMvc.perform(post("/users")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(credentials)));
-
-        var result  = mockMvc.perform(post("/login")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(credentials)))
-                .andReturn();
-
-        String jwt = result.getResponse().getHeader("Authorization");
-        JsonNode jsonNode = new ObjectMapper()
-                .readTree(result.getResponse().getContentAsString());
-        var id = jsonNode.get("id").asLong();
-        mockMvc.perform(get("/users/" + id).header("Authorization", jwt))
+        var user = createUser(userCredentials, false);
+        String jwt = getJwtFromLoginRequest(userCredentials);
+        mockMvc.perform(get("/users/" + user.getId()).header("Authorization", jwt))
                 .andExpect(status().isOk());
     }
 
     @Test
     void authenticatedUserShouldNotBeAbleToAccessOtherUserInformation() throws Exception{
-        UserClass user = new UserClass();
-        user.setUsername(new Username("Espen"));
-        user.setPassword(new Password("password123"));
-        userDAO.save(user);
-        CredentialsDTO credentials = new CredentialsDTO(new Username("test"), new Password("password"));
-
-        mockMvc.perform(post("/users")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(credentials)));
-
-        var result  = mockMvc.perform(post("/login")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(credentials)))
-                .andReturn();
-
-        String jwt = result.getResponse().getHeader("Authorization");
+        var user = createUser(userCredentials, false);
+        CredentialsDTO otherUserCredentials = new CredentialsDTO(new Username("test"), new Password("password"));
+        createUser(otherUserCredentials, false);
+        String jwt = getJwtFromLoginRequest(otherUserCredentials);
         mockMvc.perform(get("/users/" + user.getId()).header("Authorization", jwt))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void unauthenticatedUserShouldNotBeAbleToAccessOtherUserInformation() throws Exception{
-        UserClass user = new UserClass();
-        user.setUsername(new Username("Espen"));
-        user.setPassword(new Password("password123"));
-        userDAO.save(user);
+        var user = createUser(userCredentials, false);
         mockMvc.perform(get("/users/" + user.getId()))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void adminShouldBeAbleToAccessOtherUserInformation() throws Exception {
+        var user = createUser(userCredentials, false);
+        CredentialsDTO adminCredentials = new CredentialsDTO(new Username("admin"), new Password("password"));
+        createUser(adminCredentials, true);
+        String jwt = getJwtFromLoginRequest(adminCredentials);
+        mockMvc.perform(get("/users/" + user.getId()).header("Authorization", jwt))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void unauthenticatedUserShouldNotBeAbleToGetAllUsers() throws Exception{
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void authenticatedRegularUserShouldNotBeAbleToGetAllUsers() throws Exception{
+        createUser(userCredentials, false);
+        String jwt = getJwtFromLoginRequest(userCredentials);
+        mockMvc.perform(get("/users").header("Authorization", jwt))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminShouldBeAbleToGetAllUsers() throws Exception{
+        CredentialsDTO adminCredentials = new CredentialsDTO(new Username("admin"), new Password("password"));
+        createUser(adminCredentials, true);
+        String jwt = getJwtFromLoginRequest(adminCredentials);
+        mockMvc.perform(get("/users").header("Authorization", jwt))
+                .andExpect(status().isOk());
+    }
+
 
     /*
     The update and delete tests dont test for authorization since they have exactly the same authorization
@@ -155,52 +155,50 @@ public class UserControllerTest {
      */
     @Test
     void updateUserGivesStatusOk() throws Exception {
-        String userURL = mockMvc.perform(post("/users")
+        var user = createUser(userCredentials, false);
+        user.setUsername(new Username("Askeladd"));
+
+        String jwt = getJwtFromLoginRequest(userCredentials);
+
+        MvcResult result = mockMvc.perform(put("/users/" + user.getId()).header("Authorization", jwt)
             .contentType("application/json")
-            .content(objectMapper.writeValueAsString(user)))
-            .andReturn().getResponse().getRedirectedUrl();
-
-        UserClass userEntity = user.convertToUserEntity();
-        userEntity.setUsername(new Username("Askeladd"));
-
-        var loginResponse = mockMvc.perform(post("/login")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(user)))
-                .andReturn();
-
-        String jwt = loginResponse.getResponse().getHeader("Authorization");
-
-        MvcResult result = mockMvc.perform(put(userURL).header("Authorization", jwt)
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(userEntity)))
+            .content(objectMapper.writeValueAsString(user.convertToDTO())))
             .andExpect(status().isOk())
             .andReturn();
 
         JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
         Username updatedUsername = new Username(jsonNode.get("username").asText());
-        assertEquals(userEntity.getUsername(), updatedUsername);
+        assertEquals(user.getUsername(), updatedUsername);
     }
 
     @Test
     void deleteUserGivesStatusOK() throws Exception {
-        String userURL = mockMvc.perform(post("/users")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(user)))
-            .andReturn().getResponse().getRedirectedUrl();
-
-        var loginResponse = mockMvc.perform(post("/login")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(user)))
-                .andReturn();
-
-        String jwt = loginResponse.getResponse().getHeader("Authorization");
-
-        mockMvc.perform(delete(userURL).header("Authorization", jwt))
+       var user = createUser(userCredentials, false);
+        String jwt = getJwtFromLoginRequest(userCredentials);
+        mockMvc.perform(delete("/users/" + user.getId()).header("Authorization", jwt))
             .andExpect(status().isOk());
-
-        Long id = Long.parseLong(userURL.substring(userURL.length()-2));
-        assertTrue(userDAO.findById(id).isEmpty());
+        assertTrue(userDAO.findById(user.getId()).isEmpty());
     }
 
+
+    private String getJwtFromLoginRequest(CredentialsDTO credentials) throws Exception {
+        var result = mockMvc.perform(post("/login")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(credentials)))
+                .andReturn();
+
+        return result.getResponse().getHeader("Authorization");
+    }
+
+    private UserClass createUser(CredentialsDTO credentials, boolean isAdmin) {
+        UserClass user = new UserClass();
+        user.setUsername(new Username(credentials.getUsername()));
+        user.setPassword(new Password(passwordEncoder.encode(credentials.getPassword())));
+        if(isAdmin){
+            user.setUserType(UserType.ADMIN);
+        }
+        userDAO.save(user);
+        return user;
+    }
 
 }
