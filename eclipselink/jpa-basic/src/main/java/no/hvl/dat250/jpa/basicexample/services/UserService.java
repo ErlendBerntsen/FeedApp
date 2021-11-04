@@ -3,6 +3,7 @@ package no.hvl.dat250.jpa.basicexample.services;
 import no.hvl.dat250.jpa.basicexample.VoteType;
 import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
+import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,10 @@ public class UserService {
 
     public Optional<UserClass> getUser(Long id){
         return userDAO.findById(id);
+    }
+
+    public Optional<UserClass> getUserByUsername(Username username){
+        return userDAO.findByUsername(username);
     }
 
     public UserClass createUser(UserClass user){

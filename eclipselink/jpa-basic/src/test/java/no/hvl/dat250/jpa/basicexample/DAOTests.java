@@ -188,6 +188,15 @@ public class DAOTests {
     }
 
     @Test
+    public void onlyPollThatMatchesCodeShouldBeRetrieved(){
+        Poll poll1 = new Poll();
+        pollDAO.save(poll1);
+        var pollMaybe = pollDAO.findByCode(poll1.getCode());
+        assertTrue(pollMaybe.isPresent());
+        assertEquals(pollMaybe.get().getCode(), poll1.getCode());
+    }
+
+    @Test
     public void allVotesFromPollShouldBeFound(){
         Poll poll = new Poll();
         for(int i = 0; i < 10; i++) {

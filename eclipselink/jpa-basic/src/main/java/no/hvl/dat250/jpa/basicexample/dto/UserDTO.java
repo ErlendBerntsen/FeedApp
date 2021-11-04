@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 public class UserDTO {
     private final Long id;
+    //TODO password should not be included
     private final Username username;
     private final Password password;
     private final UserType userType;

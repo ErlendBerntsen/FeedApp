@@ -35,6 +35,14 @@ public class PollService {
         return pollDao.findAll();
     }
 
+    public List<Poll> getAllPublicPolls() {
+        return pollDao.findByIsPrivate(false);
+    }
+
+    public Optional<Poll> getPollByCode(Integer code){
+        return pollDao.findByCode(code);
+    }
+
     public Optional<Poll> getPoll(long id) {
         return pollDao.findById(id);
     }
@@ -115,5 +123,17 @@ public class PollService {
 
     public void deleteVote(Long voteId) {
         voteDao.deleteById(voteId);
+    }
+
+    public boolean isCreator(Long pollId, Long userId){
+        var poll = getPoll(pollId);
+        if(poll.isEmpty()){
+            return false;
+        }
+        var creator = poll.get().getCreator();
+        if(creator == null){
+            return false;
+        }
+        return userId.equals(creator.getId());
     }
 }

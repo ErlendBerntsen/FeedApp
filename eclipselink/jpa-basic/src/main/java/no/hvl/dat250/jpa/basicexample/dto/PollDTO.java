@@ -17,6 +17,8 @@ public class PollDTO {
     private Long creatorId;
     private List<Long> votesId;
 
+    public PollDTO(){}
+
     public PollDTO(Long id, String question, Timestamp votingStart, Timestamp votingEnd, Boolean isPrivate, Integer code, Long creatorId, List<Long> votesId) {
         this.id = id;
         this.question = question;

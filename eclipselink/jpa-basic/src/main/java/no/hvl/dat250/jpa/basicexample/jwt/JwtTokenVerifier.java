@@ -5,7 +5,7 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import no.hvl.dat250.jpa.basicexample.UserType;
+import no.hvl.dat250.jpa.basicexample.auth.UsernameIdPrincipal;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,7 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
@@ -49,13 +52,18 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
             Claims body = jwsClaims.getBody();
             String username = body.getSubject();
+            Long id  = Integer.toUnsignedLong((Integer)body.get("id"));
+            var authorities = (List<Map<String, String>>) body.get("authorities");
 
-            //TODO make this depend on the users authorities
-            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = UserType.REGULAR.getGrantedAuthorities();
+            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
+                    .map(authority -> new SimpleGrantedAuthority(authority.get("authority")))
+                    .collect(Collectors.toSet());
 
+
+            UsernameIdPrincipal principal = new UsernameIdPrincipal(id, username);
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    username,
-                    null, //Should this be null? Who knows
+                    principal,
+                    null,
                     simpleGrantedAuthorities
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);

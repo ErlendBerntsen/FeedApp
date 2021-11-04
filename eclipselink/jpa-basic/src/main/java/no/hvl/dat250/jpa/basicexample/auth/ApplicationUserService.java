@@ -34,4 +34,5 @@ public class ApplicationUserService implements UserDetailsService {
                 true ,
                 true);
     }
+
 }
