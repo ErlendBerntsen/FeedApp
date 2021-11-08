@@ -20,6 +20,9 @@ public class VoteDTO {
         this.pollId = pollId;
     }
 
+    public VoteDTO() {
+    }
+
     public Vote convertToEntity(){
         Vote vote = new Vote();
         vote.setOptionChosen(this.optionChosen);

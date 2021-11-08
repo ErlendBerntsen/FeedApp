@@ -8,6 +8,7 @@ import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.dto.CredentialsDTO;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
+import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,11 +53,15 @@ class PollControllerTests {
 
     private CredentialsDTO adminCredentials = new CredentialsDTO(new Username("admin"), new Password("password"));
 
+    private VoteDTO vote = new VoteDTO();
+
 
     @BeforeEach
     void setup(){
         pollDAO.deleteAll();
         userDAO.deleteAll();
+        vote.setVoteType(VoteType.GUEST);
+        vote.setOptionChosen("yes");
     }
 
 
@@ -243,6 +248,44 @@ class PollControllerTests {
         createPollAndGetURL(poll, adminCredentials);
         mockMvc.perform(get("/polls/?creator=" + creator.getId()))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void userShouldNotBeAbleToVoteOnPollThatIsHasNotStarted() throws Exception {
+        var poll = new Poll();
+        poll.setVotingStart(Timestamp.valueOf("9999-09-20 12:00:00"));
+        pollDAO.save(poll);
+
+        mockMvc.perform(post("/polls/" + poll.getId() + "/votes")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(vote)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void userShouldNotBeAbleToVoteOnPollThatIsHasEnded() throws Exception {
+        var poll = new Poll();
+        poll.setVotingStart(Timestamp.valueOf("1998-09-20 12:00:00"));
+        poll.setVotingEnd(Timestamp.valueOf("1999-09-20 12:00:00"));
+        pollDAO.save(poll);
+
+        mockMvc.perform(post("/polls/" + poll.getId() + "/votes")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(vote)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void userShouldBeAbleToVoteOnPollThatHasStarted() throws Exception {
+        var poll = new Poll();
+        poll.setVotingStart(Timestamp.valueOf("1998-09-20 12:00:00"));
+        poll.setVotingEnd(Timestamp.valueOf("3999-09-20 12:00:00"));
+        pollDAO.save(poll);
+
+        mockMvc.perform(post("/polls/" + poll.getId() + "/votes")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(vote)))
+                .andExpect(status().isCreated());
     }
 
 

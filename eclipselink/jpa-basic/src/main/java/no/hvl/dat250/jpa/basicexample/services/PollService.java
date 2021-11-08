@@ -83,7 +83,7 @@ public class PollService {
 
     public Optional<Vote> addVote(Long id, VoteDTO vote) {
         var poll = getPoll(id);
-        if(poll.isPresent()) {
+        if(poll.isPresent() && poll.get().isPollOpenForVoting()) {
             var pollToVote = poll.get();
             var newVote = vote.convertToEntity();
             if(newVote.getVoteType().equals(VoteType.USER) && vote.getVoterId() != null){

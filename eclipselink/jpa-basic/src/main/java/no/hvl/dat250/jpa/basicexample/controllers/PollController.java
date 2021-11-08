@@ -152,9 +152,13 @@ public class PollController {
 
     @PostMapping("/{id}/votes")
     public ResponseEntity<?> addVote(@PathVariable Long id, @RequestBody VoteDTO vote) {
-        var res = pollService.addVote(id, vote);
+        var res = pollService.getPoll(id);
         if (res.isEmpty()) {
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
+        }
+        var voteRes = pollService.addVote(id, vote);
+        if(voteRes.isEmpty()){
+            return new ResponseEntity<>("The poll isn't open for voting", HttpStatus.FORBIDDEN);
         }
         return ResponseEntity.created(URI.create("/polls/" + id + "/votes/" + res.get().getId())).build();
     }

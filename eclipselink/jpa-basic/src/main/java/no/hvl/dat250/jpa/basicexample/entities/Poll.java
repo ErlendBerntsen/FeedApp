@@ -6,6 +6,7 @@ import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -47,6 +48,11 @@ public class Poll {
         var upperbound = 1000000;
         var lowerbound = 100000;
         setCode(random.nextInt(upperbound-lowerbound)+lowerbound);
+    }
+
+    public boolean isPollOpenForVoting(){
+        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
+        return currentTime.after(votingStart) && currentTime.before(votingEnd);
     }
 
     public void addCreator(UserClass user){
