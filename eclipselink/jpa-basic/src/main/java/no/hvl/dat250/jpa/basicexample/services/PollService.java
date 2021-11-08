@@ -5,6 +5,7 @@ import no.hvl.dat250.jpa.basicexample.dao.PollDAO;
 import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.dao.VoteDAO;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
+import no.hvl.dat250.jpa.basicexample.dto.ResultDTO;
 import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.Vote;
@@ -135,5 +136,21 @@ public class PollService {
             return false;
         }
         return userId.equals(creator.getId());
+    }
+
+    public ResultDTO getResult(Long id) {
+        var votes = getAllVotes(id);
+        var yesCounter = 0;
+        var noCounter = 0;
+        for(Vote vote : votes.get()){
+            if("yes".equalsIgnoreCase(vote.getOptionChosen())){
+                yesCounter++;
+            }
+            if("no".equalsIgnoreCase(vote.getOptionChosen())){
+                noCounter++;
+            }
+        }
+        return new ResultDTO(yesCounter, noCounter);
+
     }
 }
