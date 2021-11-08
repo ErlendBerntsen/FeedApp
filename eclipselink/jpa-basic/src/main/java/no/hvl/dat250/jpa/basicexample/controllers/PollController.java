@@ -117,6 +117,13 @@ public class PollController {
     }
 
 
+    @GetMapping("/{id}/result")
+    public ResponseEntity<?> getResults(@PathVariable Long id){
+        if(pollService.getPoll(id).isEmpty()){
+            return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(pollService.getResult(id), HttpStatus.OK);
+    }
 
     /*
     VOTE CONTROLLER METHODS
