@@ -76,7 +76,6 @@ public class UserClass {
         votes.forEach(vote -> votesId.add(vote.getId()));
         return new UserDTO(this.id,
                 this.username,
-                this.password,
                 this.userType,
                 createdPollsId,
                 votesId);

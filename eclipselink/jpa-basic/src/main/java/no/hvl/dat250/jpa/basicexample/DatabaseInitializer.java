@@ -62,9 +62,8 @@ public class DatabaseInitializer implements CommandLineRunner{
         var poll1 = new Poll();
         poll1.setIsPrivate(false);
         poll1.setQuestion("Is pineapple on pizza allowed?");
-        //TODO maybe change this to be hardcoded again? This is just for easily testing to dweet.io
-        poll1.setVotingStart(Timestamp.valueOf(LocalDateTime.now().plusSeconds(5)));
-        poll1.setVotingEnd(Timestamp.valueOf(LocalDateTime.now().plusSeconds(20)));
+        poll1.setVotingStart(Timestamp.valueOf(LocalDateTime.now().plusYears(5)));
+        poll1.setVotingEnd(Timestamp.valueOf(LocalDateTime.now().plusYears(20)));
         poll1.addCreator(user1);
 
         var poll2 = new Poll ();

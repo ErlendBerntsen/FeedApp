@@ -49,8 +49,9 @@ public class UserService {
         var user = getUser(id);
         if(user.isPresent()){
             var userToUpdate = user.get();
+            //TODO check if username exists,  update password in a other way? also encrypt it
             userToUpdate.setUsername(updatedUser.getUsername());
-            userToUpdate.setPassword(updatedUser.getPassword());
+            //userToUpdate.setPassword(updatedUser.getPassword());
             userToUpdate.setUserType(updatedUser.getUserType());
             return userToUpdate;
         }else{
