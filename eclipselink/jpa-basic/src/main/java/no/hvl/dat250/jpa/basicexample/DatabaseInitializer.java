@@ -62,8 +62,9 @@ public class DatabaseInitializer implements CommandLineRunner{
         var poll1 = new Poll();
         poll1.setIsPrivate(false);
         poll1.setQuestion("Is pineapple on pizza allowed?");
-        poll1.setVotingStart(Timestamp.valueOf("2021-09-20 00:00:00"));
-        poll1.setVotingEnd(Timestamp.valueOf("2021-09-30 00:00:00"));
+        //TODO maybe change this to be hardcoded again? This is just for easily testing to dweet.io
+        poll1.setVotingStart(Timestamp.valueOf(LocalDateTime.now().plusSeconds(5)));
+        poll1.setVotingEnd(Timestamp.valueOf(LocalDateTime.now().plusSeconds(20)));
         poll1.addCreator(user1);
 
         var poll2 = new Poll ();
@@ -76,7 +77,7 @@ public class DatabaseInitializer implements CommandLineRunner{
         var poll3 = new Poll ();
         poll3.setIsPrivate(false);
         poll3.setQuestion("Is there a war in Bas Sing Se?");
-        poll3.setVotingStart(Timestamp.valueOf(LocalDateTime.now()));
+        poll3.setVotingStart(Timestamp.valueOf(LocalDateTime.now().plusYears(4)));
         poll3.setVotingEnd(Timestamp.valueOf("2022-01-01 00:00:00"));
 
         user1.voteOnPoll(poll1, "yes", VoteType.USER);
@@ -108,5 +109,6 @@ public class DatabaseInitializer implements CommandLineRunner{
 
         pollDAO.findAll().forEach(poll ->
                 log.info(String.format("Created poll: %s", poll.toString())));
+
     }
 }

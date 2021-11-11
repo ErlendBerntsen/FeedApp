@@ -51,7 +51,7 @@ public class DAOTests {
         poll.setIsPrivate(false);
         poll.setQuestion("Lorem ipsum?");
         poll.setVotingStart(Timestamp.valueOf("2020-09-20 00:00:00"));
-        poll.setVotingEnd(Timestamp.valueOf("2020-09-30 00:00:00"));
+        poll.setVotingEnd(Timestamp.valueOf("2021-09-30 00:00:00"));
         poll.setCode(123);
 
         vote = new Vote ();

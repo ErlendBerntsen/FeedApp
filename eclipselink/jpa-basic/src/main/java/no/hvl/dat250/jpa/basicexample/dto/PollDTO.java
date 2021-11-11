@@ -5,10 +5,11 @@ import no.hvl.dat250.jpa.basicexample.entities.Poll;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class PollDTO {
-    private Long id;
+    private UUID id;
     private String question;
     private Timestamp votingStart;
     private Timestamp votingEnd;
@@ -19,7 +20,7 @@ public class PollDTO {
 
     public PollDTO(){}
 
-    public PollDTO(Long id, String question, Timestamp votingStart, Timestamp votingEnd, Boolean isPrivate, Integer code, Long creatorId, List<Long> votesId) {
+    public PollDTO(UUID id, String question, Timestamp votingStart, Timestamp votingEnd, Boolean isPrivate, Integer code, Long creatorId, List<Long> votesId) {
         this.id = id;
         this.question = question;
         this.votingStart = votingStart;

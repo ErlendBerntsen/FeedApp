@@ -23,6 +23,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -119,7 +120,7 @@ class PollControllerTests {
 
         mockMvc.perform(delete(pollURL).header("Authorization", jwt))
                 .andExpect(status().isOk());
-        Long pollId = Long.parseLong(pollURL.substring(pollURL.length()-2));
+        UUID pollId = UUID.fromString(pollURL.substring(pollURL.length()-2));
 
         assertTrue(pollDAO.findById(pollId).isEmpty());
     }
@@ -136,7 +137,7 @@ class PollControllerTests {
         mockMvc.perform(delete(pollURL).header("Authorization", jwt))
                 .andExpect(status().isForbidden());
 
-        Long pollId = Long.parseLong(pollURL.substring(pollURL.length()-2));
+        UUID pollId = UUID.fromString(pollURL.substring(pollURL.length()-2));
         assertTrue(pollDAO.findById(pollId).isPresent());
     }
 
@@ -151,7 +152,7 @@ class PollControllerTests {
         mockMvc.perform(delete(pollURL))
                 .andExpect(status().isForbidden());
 
-        Long pollId = Long.parseLong(pollURL.substring(pollURL.length()-2));
+        UUID pollId = UUID.fromString(pollURL.substring(pollURL.length()-2));
         assertTrue(pollDAO.findById(pollId).isPresent());
     }
 
@@ -189,7 +190,7 @@ class PollControllerTests {
 
         mockMvc.perform(delete(pollURL).header("Authorization", jwt))
                 .andExpect(status().isOk());
-        Long pollId = Long.parseLong(pollURL.substring(pollURL.length()-2));
+        UUID pollId = UUID.fromString(pollURL.substring(pollURL.length()-2));
 
         assertTrue(pollDAO.findById(pollId).isEmpty());
     }

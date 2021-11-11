@@ -18,6 +18,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/polls")
@@ -80,7 +81,7 @@ public class PollController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPoll(@PathVariable Long id) {
+    public ResponseEntity<?> getPoll(@PathVariable UUID id) {
         var poll = pollService.getPoll(id);
         if (poll.isPresent()) {
             return new ResponseEntity<>(poll.get().convertToDTO(), HttpStatus.OK);
@@ -97,7 +98,7 @@ public class PollController {
 
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated() and (hasRole('ROLE_ADMIN') or @pollService.isCreator(#id, authentication.principal.getId()))")
-    public ResponseEntity<?> updatePoll(@PathVariable Long id, @RequestBody PollDTO updatedPoll){
+    public ResponseEntity<?> updatePoll(@PathVariable UUID id, @RequestBody PollDTO updatedPoll){
         var poll = pollService.updatePoll(id, updatedPoll);
         if(id.equals(poll.getId())){
             return ResponseEntity.ok(poll.convertToDTO());
@@ -108,7 +109,7 @@ public class PollController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated() and (hasRole('ROLE_ADMIN') or @pollService.isCreator(#id, authentication.principal.getId()))")
-    public ResponseEntity<?> deletePoll(@PathVariable Long id){
+    public ResponseEntity<?> deletePoll(@PathVariable UUID id){
         if(pollService.getPoll(id).isEmpty()){
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
         }
@@ -118,7 +119,7 @@ public class PollController {
 
 
     @GetMapping("/{id}/result")
-    public ResponseEntity<?> getResults(@PathVariable Long id){
+    public ResponseEntity<?> getResults(@PathVariable UUID id){
         if(pollService.getPoll(id).isEmpty()){
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
         }
@@ -130,7 +131,7 @@ public class PollController {
      */
 
     @GetMapping("/{id}/votes")
-    public ResponseEntity<?> getAllVotes(@PathVariable Long id){
+    public ResponseEntity<?> getAllVotes(@PathVariable UUID id){
         var votes = pollService.getAllVotes(id);
         if (votes.isPresent()) {
             List<VoteDTO> allVotesInPollDTO = new ArrayList<>();
@@ -141,7 +142,7 @@ public class PollController {
     }
 
     @GetMapping("/{pollId}/votes/{voteId}")
-    public ResponseEntity<?> getVote(@PathVariable Long pollId, @PathVariable Long voteId){
+    public ResponseEntity<?> getVote(@PathVariable UUID pollId, @PathVariable Long voteId){
         var vote = pollService.getVote(pollId, voteId);
         if(vote.isPresent()){
             return new ResponseEntity<>(vote.get().convertToDTO(), HttpStatus.OK);
@@ -151,7 +152,7 @@ public class PollController {
     }
 
     @PostMapping("/{id}/votes")
-    public ResponseEntity<?> addVote(@PathVariable Long id, @RequestBody VoteDTO vote) {
+    public ResponseEntity<?> addVote(@PathVariable UUID id, @RequestBody VoteDTO vote) {
         var res = pollService.getPoll(id);
         if (res.isEmpty()) {
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
@@ -165,7 +166,7 @@ public class PollController {
 
 
     @PutMapping("/{pollId}/votes/{voteId}")
-    public ResponseEntity<?> updateVote(@PathVariable Long pollId, @PathVariable Long voteId, @RequestBody VoteDTO updatedVote){
+    public ResponseEntity<?> updateVote(@PathVariable UUID pollId, @PathVariable Long voteId, @RequestBody VoteDTO updatedVote){
         var vote = pollService.updateVote(pollId, voteId, updatedVote);
         if(vote.isPresent()){
             if(vote.get().getId().equals(voteId)){
@@ -180,7 +181,7 @@ public class PollController {
     }
 
     @DeleteMapping("/{pollId}/votes/{voteId}")
-    public ResponseEntity<?> deleteVote(@PathVariable Long pollId, @PathVariable Long voteId){
+    public ResponseEntity<?> deleteVote(@PathVariable UUID pollId, @PathVariable Long voteId){
         if(pollService.getPoll(pollId).isEmpty()){
             return new ResponseEntity<>("Couldn't find poll with id " + pollId, HttpStatus.NOT_FOUND);
         }else if(pollService.getVote(pollId, voteId).isEmpty()){

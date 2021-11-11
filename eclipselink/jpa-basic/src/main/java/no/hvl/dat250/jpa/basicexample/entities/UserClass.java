@@ -12,6 +12,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static no.hvl.dat250.jpa.basicexample.UserType.*;
 
@@ -69,7 +70,7 @@ public class UserClass {
     }
 
     public UserDTO convertToDTO(){
-        List<Long> createdPollsId = new ArrayList<>();
+        List<UUID> createdPollsId = new ArrayList<>();
         createdPolls.forEach(poll -> createdPollsId.add(poll.getId()));
         List<Long> votesId = new ArrayList<>();
         votes.forEach(vote -> votesId.add(vote.getId()));

@@ -13,8 +13,7 @@ import java.util.*;
 @Data
 public class Poll {
     @Id
-    @GeneratedValue
-    private Long id;
+    private UUID id = UUID.randomUUID();
     private String question;
 
     /*
@@ -52,7 +51,27 @@ public class Poll {
 
     public boolean isPollOpenForVoting(){
         Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
-        return currentTime.after(votingStart) && currentTime.before(votingEnd);
+        return currentTime.after(votingStart) && (votingEnd == null || currentTime.before(votingEnd));
+    }
+
+    public Integer getYesVotes(){
+        int yesVotes = 0;
+        for(Vote vote : votes){
+            if("yes".equalsIgnoreCase(vote.getOptionChosen())){
+                yesVotes++;
+            }
+        }
+        return yesVotes;
+    }
+
+    public Integer getNoVotes(){
+        int noVotes = 0;
+        for(Vote vote : votes){
+            if("no".equalsIgnoreCase(vote.getOptionChosen())){
+                noVotes++;
+            }
+        }
+        return noVotes;
     }
 
     public void addCreator(UserClass user){
