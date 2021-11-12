@@ -36,19 +36,19 @@ public class PollController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllPolls(@RequestParam Optional<Boolean> isPrivate,
+    public ResponseEntity<Object> getAllPolls(@RequestParam Optional<Boolean> isPrivate,
                                          @RequestParam Optional<Integer> code,
-                                         @RequestParam Optional<Long> creator) {
+                                         @RequestParam Optional<UUID> creator) {
         List<PollDTO> allPollsDTO = new ArrayList<>();
         if (isPrivate.isPresent() && Boolean.FALSE.equals(isPrivate.get())) {
-            pollService.getAllPublicPolls().forEach(poll -> allPollsDTO.add(poll.convertToDTO()));
+            pollService.getAllPublicPolls().forEach(poll -> allPollsDTO.add(mapper.convertPollEntityToDTO(poll)));
             return new ResponseEntity<>(allPollsDTO, HttpStatus.OK);
         }
 
         if(code.isPresent()){
             var poll = pollService.getPollByCode(code.get());
             if (poll.isPresent()) {
-                return new ResponseEntity<>(poll.get().convertToDTO(), HttpStatus.OK);
+                return new ResponseEntity<>(mapper.convertPollEntityToDTO(poll.get()), HttpStatus.OK);
             }
             return new ResponseEntity<>("Could not find poll with code " + code.get(), HttpStatus.NOT_FOUND);
         }
@@ -57,11 +57,11 @@ public class PollController {
         if(creator.isPresent()){
             if(!"anonymousUser".equals(authentication.getName())){
                 var principal = (UsernameIdPrincipal) authentication.getPrincipal();
-                if(principal.getId().equals(creator.get())
+                if(creator.get().equals(principal.getId())
                         || authentication.getAuthorities().contains(UserType.ADMIN.getRoleAuthority())){
                     var user = userService.getUser(creator.get());
                     if(user.isPresent()){
-                        user.get().getCreatedPolls().forEach(poll -> allPollsDTO.add(poll.convertToDTO()));
+                        user.get().getCreatedPolls().forEach(poll -> allPollsDTO.add(mapper.convertPollEntityToDTO(poll)));
                         return new ResponseEntity<>(allPollsDTO, HttpStatus.OK);
                     }else{
                         return new ResponseEntity<>("Couldn't find user with id " + creator.get(), HttpStatus.NOT_FOUND);
@@ -73,7 +73,7 @@ public class PollController {
 
         if (!"anonymousUser".equals(authentication.getName())
                 && authentication.getAuthorities().contains(UserType.ADMIN.getRoleAuthority())) {
-            pollService.getAllPolls().forEach(poll -> allPollsDTO.add(poll.convertToDTO()));
+            pollService.getAllPolls().forEach(poll -> allPollsDTO.add(mapper.convertPollEntityToDTO(poll)));
             return new ResponseEntity<>(allPollsDTO, HttpStatus.OK);
         }
         return new ResponseEntity<>("Unauthorized", HttpStatus.FORBIDDEN);
@@ -81,27 +81,27 @@ public class PollController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPoll(@PathVariable UUID id) {
+    public ResponseEntity<Object> getPoll(@PathVariable UUID id) {
         var poll = pollService.getPoll(id);
         if (poll.isPresent()) {
-            return new ResponseEntity<>(poll.get().convertToDTO(), HttpStatus.OK);
+            return new ResponseEntity<>(mapper.convertPollEntityToDTO(poll.get()), HttpStatus.OK);
         }
         return new ResponseEntity<>("Could not find poll with id " + id, HttpStatus.NOT_FOUND);
     }
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> createPoll(@RequestBody PollDTO poll){
-        var newPoll = pollService.createPoll(mapper.convertPollToEntity(poll));
+    public ResponseEntity<Object> createPoll(@RequestBody PollDTO poll){
+        var newPoll = pollService.createPoll(mapper.convertPollDTOToEntity(poll));
         return ResponseEntity.created(URI.create("/polls/" + newPoll.getId())).build();
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated() and (hasRole('ROLE_ADMIN') or @pollService.isCreator(#id, authentication.principal.getId()))")
-    public ResponseEntity<?> updatePoll(@PathVariable UUID id, @RequestBody PollDTO updatedPoll){
+    public ResponseEntity<Object> updatePoll(@PathVariable UUID id, @RequestBody PollDTO updatedPoll){
         var poll = pollService.updatePoll(id, updatedPoll);
         if(id.equals(poll.getId())){
-            return ResponseEntity.ok(poll.convertToDTO());
+            return ResponseEntity.ok(mapper.convertPollEntityToDTO(poll));
         }else{
             return ResponseEntity.created(URI.create("/polls/" + poll.getId())).build();
         }
@@ -109,7 +109,7 @@ public class PollController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated() and (hasRole('ROLE_ADMIN') or @pollService.isCreator(#id, authentication.principal.getId()))")
-    public ResponseEntity<?> deletePoll(@PathVariable UUID id){
+    public ResponseEntity<Object> deletePoll(@PathVariable UUID id){
         if(pollService.getPoll(id).isEmpty()){
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
         }
@@ -119,7 +119,7 @@ public class PollController {
 
 
     @GetMapping("/{id}/result")
-    public ResponseEntity<?> getResults(@PathVariable UUID id){
+    public ResponseEntity<Object> getResults(@PathVariable UUID id){
         if(pollService.getPoll(id).isEmpty()){
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
         }
@@ -131,28 +131,28 @@ public class PollController {
      */
 
     @GetMapping("/{id}/votes")
-    public ResponseEntity<?> getAllVotes(@PathVariable UUID id){
+    public ResponseEntity<Object> getAllVotes(@PathVariable UUID id){
         var votes = pollService.getAllVotes(id);
         if (votes.isPresent()) {
             List<VoteDTO> allVotesInPollDTO = new ArrayList<>();
-            votes.get().forEach(vote -> allVotesInPollDTO.add(vote.convertToDTO()));
+            votes.get().forEach(vote -> allVotesInPollDTO.add(mapper.convertVoteEntityToDTO(vote)));
             return new ResponseEntity<>(allVotesInPollDTO, HttpStatus.OK);
         }
         return new ResponseEntity<>("Could not find poll with id " + id, HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/{pollId}/votes/{voteId}")
-    public ResponseEntity<?> getVote(@PathVariable UUID pollId, @PathVariable Long voteId){
-        var vote = pollService.getVote(pollId, voteId);
+    public ResponseEntity<Object> getVote(@PathVariable UUID pollId, @PathVariable UUID voteId){
+        var vote = pollService.getVote(voteId);
         if(vote.isPresent()){
-            return new ResponseEntity<>(vote.get().convertToDTO(), HttpStatus.OK);
+            return new ResponseEntity<>(mapper.convertVoteEntityToDTO(vote.get()), HttpStatus.OK);
         }else{
             return new ResponseEntity<>("Could not find vote with id " + voteId, HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/{id}/votes")
-    public ResponseEntity<?> addVote(@PathVariable UUID id, @RequestBody VoteDTO vote) {
+    public ResponseEntity<Object> addVote(@PathVariable UUID id, @RequestBody VoteDTO vote) {
         var res = pollService.getPoll(id);
         if (res.isEmpty()) {
             return new ResponseEntity<>("Couldn't find poll with id " + id, HttpStatus.NOT_FOUND);
@@ -166,11 +166,11 @@ public class PollController {
 
 
     @PutMapping("/{pollId}/votes/{voteId}")
-    public ResponseEntity<?> updateVote(@PathVariable UUID pollId, @PathVariable Long voteId, @RequestBody VoteDTO updatedVote){
+    public ResponseEntity<Object> updateVote(@PathVariable UUID pollId, @PathVariable UUID voteId, @RequestBody VoteDTO updatedVote){
         var vote = pollService.updateVote(pollId, voteId, updatedVote);
         if(vote.isPresent()){
             if(vote.get().getId().equals(voteId)){
-                return new ResponseEntity<>(vote.get().convertToDTO(), HttpStatus.OK);
+                return new ResponseEntity<>(mapper.convertVoteEntityToDTO(vote.get()), HttpStatus.OK);
 
             }else{
                 return ResponseEntity.created(URI.create("/polls/" + pollId + "/votes/" + vote.get().getId())).build();
@@ -181,10 +181,10 @@ public class PollController {
     }
 
     @DeleteMapping("/{pollId}/votes/{voteId}")
-    public ResponseEntity<?> deleteVote(@PathVariable UUID pollId, @PathVariable Long voteId){
+    public ResponseEntity<Object> deleteVote(@PathVariable UUID pollId, @PathVariable UUID voteId){
         if(pollService.getPoll(pollId).isEmpty()){
             return new ResponseEntity<>("Couldn't find poll with id " + pollId, HttpStatus.NOT_FOUND);
-        }else if(pollService.getVote(pollId, voteId).isEmpty()){
+        }else if(pollService.getVote(voteId).isEmpty()){
             return new ResponseEntity<>("Couldn't find vote with id " + voteId, HttpStatus.NOT_FOUND);
         }
         pollService.deleteVote(voteId);

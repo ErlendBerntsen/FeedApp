@@ -7,6 +7,7 @@ import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.dto.CredentialsDTO;
+import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserControllerTest {
+class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -156,13 +157,14 @@ public class UserControllerTest {
     @Test
     void updateUserGivesStatusOk() throws Exception {
         var user = createUser(userCredentials, false);
+        var userDTO = new UserDTO(null, new Username("Askeladd"), null, null, null, null);
         user.setUsername(new Username("Askeladd"));
 
         String jwt = getJwtFromLoginRequest(userCredentials);
 
         MvcResult result = mockMvc.perform(put("/users/" + user.getId()).header("Authorization", jwt)
             .contentType("application/json")
-            .content(objectMapper.writeValueAsString(user.convertToDTO())))
+            .content(objectMapper.writeValueAsString(userDTO)))
             .andExpect(status().isOk())
             .andReturn();
 

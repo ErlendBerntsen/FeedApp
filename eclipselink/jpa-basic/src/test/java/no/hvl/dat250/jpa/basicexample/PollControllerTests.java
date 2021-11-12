@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,7 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -120,8 +119,7 @@ class PollControllerTests {
 
         mockMvc.perform(delete(pollURL).header("Authorization", jwt))
                 .andExpect(status().isOk());
-        UUID pollId = UUID.fromString(pollURL.substring(pollURL.length()-2));
-
+        UUID pollId = getUUIDFromPollURL(pollURL);
         assertTrue(pollDAO.findById(pollId).isEmpty());
     }
 
@@ -137,7 +135,7 @@ class PollControllerTests {
         mockMvc.perform(delete(pollURL).header("Authorization", jwt))
                 .andExpect(status().isForbidden());
 
-        UUID pollId = UUID.fromString(pollURL.substring(pollURL.length()-2));
+        UUID pollId = getUUIDFromPollURL(pollURL);
         assertTrue(pollDAO.findById(pollId).isPresent());
     }
 
@@ -152,9 +150,10 @@ class PollControllerTests {
         mockMvc.perform(delete(pollURL))
                 .andExpect(status().isForbidden());
 
-        UUID pollId = UUID.fromString(pollURL.substring(pollURL.length()-2));
+        UUID pollId = getUUIDFromPollURL(pollURL);
         assertTrue(pollDAO.findById(pollId).isPresent());
     }
+
 
     @Test
     void adminShouldGetAllPolls() throws Exception{
@@ -190,8 +189,7 @@ class PollControllerTests {
 
         mockMvc.perform(delete(pollURL).header("Authorization", jwt))
                 .andExpect(status().isOk());
-        UUID pollId = UUID.fromString(pollURL.substring(pollURL.length()-2));
-
+        UUID pollId = getUUIDFromPollURL(pollURL);
         assertTrue(pollDAO.findById(pollId).isEmpty());
     }
 
@@ -283,6 +281,7 @@ class PollControllerTests {
         poll.setVotingEnd(Timestamp.valueOf("3999-09-20 12:00:00"));
         pollDAO.save(poll);
 
+        System.out.println(poll.getId());
         mockMvc.perform(post("/polls/" + poll.getId() + "/votes")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(vote)))
@@ -325,6 +324,10 @@ class PollControllerTests {
         }
         userDAO.save(creator);
         return creator;
+    }
+
+    private UUID getUUIDFromPollURL(String pollURL) {
+        return UUID.fromString(pollURL.substring(pollURL.length()-36));
     }
 
 }

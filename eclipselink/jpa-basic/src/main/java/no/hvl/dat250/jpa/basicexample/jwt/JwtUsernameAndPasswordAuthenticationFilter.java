@@ -62,7 +62,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
 
         ApplicationUser authenticatedUser = (ApplicationUser) authResult.getPrincipal();
-        String key = "makethismoresecureyouabsolutedumbmonkeyomgnowigotabugsincethiswasntstrongenoughwowgreatjob";
+        var key = "makethismoresecureyouabsolutedumbmonkeyomgnowigotabugsincethiswasntstrongenoughwowgreatjob";
         String token = Jwts.builder()
                 .setSubject(authResult.getName())
                 .claim("id", authenticatedUser.getId())
@@ -73,7 +73,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                 .compact();
         response.addHeader("Authorization", "Bearer " + token);
 
-        String userData = new ObjectMapper().writeValueAsString(authenticatedUser);
+        var userData = new ObjectMapper().writeValueAsString(authenticatedUser);
         response.getWriter().write(userData);
     }
 

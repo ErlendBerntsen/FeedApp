@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class JwtTokenVerifier extends OncePerRequestFilter {
@@ -42,7 +43,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             String jwtToken = headerToken.replace("Bearer ", "");
 
             //TODO make this more secure and make it a environment variable
-            String key = "makethismoresecureyouabsolutedumbmonkeyomgnowigotabugsincethiswasntstrongenoughwowgreatjob";
+            var key = "makethismoresecureyouabsolutedumbmonkeyomgnowigotabugsincethiswasntstrongenoughwowgreatjob";
 
             //Verify that the token matches
             Jws<Claims> jwsClaims = Jwts.parserBuilder()
@@ -50,9 +51,9 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
                     .build()
                     .parseClaimsJws(jwtToken);
 
-            Claims body = jwsClaims.getBody();
+            var body = jwsClaims.getBody();
             String username = body.getSubject();
-            Long id  = Integer.toUnsignedLong((Integer)body.get("id"));
+            var id  = UUID.fromString(body.get("id").toString());
             var authorities = (List<Map<String, String>>) body.get("authorities");
 
             Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
@@ -60,7 +61,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
                     .collect(Collectors.toSet());
 
 
-            UsernameIdPrincipal principal = new UsernameIdPrincipal(id, username);
+            var principal = new UsernameIdPrincipal(id, username);
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     principal,
                     null,

@@ -4,21 +4,19 @@ import no.hvl.dat250.jpa.basicexample.VoteType;
 import no.hvl.dat250.jpa.basicexample.dao.PollDAO;
 import no.hvl.dat250.jpa.basicexample.dao.UserDAO;
 import no.hvl.dat250.jpa.basicexample.dao.VoteDAO;
+import no.hvl.dat250.jpa.basicexample.dto.Mapper;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
 import no.hvl.dat250.jpa.basicexample.dto.ResultDTO;
 import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.Vote;
-import org.apache.catalina.connector.Request;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,19 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.http.HttpRequest;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @Service
 @Transactional
@@ -48,12 +40,14 @@ public class PollService {
     private final PollDAO pollDao;
     private final VoteDAO voteDao;
     private final UserDAO userDao;
+    private final Mapper mapper;
 
     @Autowired
-    public PollService(PollDAO pollDAO, VoteDAO voteDao, UserDAO userDAO){
+    public PollService(PollDAO pollDAO, VoteDAO voteDao, UserDAO userDAO, Mapper mapper){
         this.pollDao = pollDAO;
         this.voteDao = voteDao;
         this.userDao = userDAO;
+        this.mapper = mapper;
     }
 
     public List<Poll> getAllPolls() {
@@ -72,7 +66,7 @@ public class PollService {
         return pollDao.findById(id);
     }
 
-    public Poll createPoll(Poll poll ) {
+    public Poll createPoll(Poll poll) {
         return pollDao.save(poll);
     }
 
@@ -87,7 +81,7 @@ public class PollService {
             pollToUpdate.setCode(updatedPoll.getCode());
             return pollToUpdate;
         }else{
-            return createPoll(updatedPoll.convertToEntity());
+            return createPoll(mapper.convertPollDTOToEntity(updatedPoll));
         }
     }
 
@@ -109,9 +103,9 @@ public class PollService {
         var poll = getPoll(id);
         if(poll.isPresent() && poll.get().isPollOpenForVoting()) {
             var pollToVote = poll.get();
-            var newVote = vote.convertToEntity();
-            if(newVote.getVoteType().equals(VoteType.USER) && vote.getVoterId() != null){
-                newVote.addVoter(userDao.findById(vote.getVoterId()).get());
+            var newVote = mapper.convertVoteDTOToEntity(vote);
+            if(!newVote.getVoteType().equals(VoteType.USER)){
+                newVote.removeVoter();
             }
             newVote.addPoll(pollToVote);
             voteDao.save(newVote);
@@ -120,16 +114,15 @@ public class PollService {
         return Optional.empty();
     }
 
-    public Optional<Vote> getVote(UUID pollId, Long voteId) {
-        //TODO make ids of votes only unique inside a poll and not globally unique?
+    public Optional<Vote> getVote(UUID voteId) {
         return voteDao.findById(voteId);
     }
 
-    public Optional<Vote> updateVote(UUID pollId, Long voteId, VoteDTO updatedVote){
+    public Optional<Vote> updateVote(UUID pollId, UUID voteId, VoteDTO updatedVote){
         if(getPoll(pollId).isEmpty()){
             return Optional.empty();
         }
-        var vote = getVote(pollId, voteId);
+        var vote = getVote(voteId);
         if(vote.isPresent()){
             var voteToUpdate = vote.get();
             voteToUpdate.setOptionChosen(updatedVote.getOptionChosen());
@@ -146,11 +139,11 @@ public class PollService {
         return addVote(pollId, updatedVote);
     }
 
-    public void deleteVote(Long voteId) {
+    public void deleteVote(UUID voteId) {
         voteDao.deleteById(voteId);
     }
 
-    public boolean isCreator(UUID pollId, Long userId){
+    public boolean isCreator(UUID pollId, UUID userId){
         var poll = getPoll(pollId);
         if(poll.isEmpty()){
             return false;
@@ -164,6 +157,9 @@ public class PollService {
 
     public ResultDTO getResult(UUID id) {
         var votes = getAllVotes(id);
+        if(votes.isEmpty()){
+            return new ResultDTO(0, 0);
+        }
         var yesCounter = 0;
         var noCounter = 0;
         for(Vote vote : votes.get()){
