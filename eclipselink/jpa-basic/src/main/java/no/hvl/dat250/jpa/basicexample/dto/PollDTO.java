@@ -1,25 +1,25 @@
 package no.hvl.dat250.jpa.basicexample.dto;
 
 import lombok.Data;
-import no.hvl.dat250.jpa.basicexample.entities.Poll;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class PollDTO {
-    private Long id;
+    private UUID id;
     private String question;
     private Timestamp votingStart;
     private Timestamp votingEnd;
     private Boolean isPrivate;
     private Integer code;
-    private Long creatorId;
-    private List<Long> votesId;
+    private UUID creatorId;
+    private List<UUID> votesId;
 
     public PollDTO(){}
 
-    public PollDTO(Long id, String question, Timestamp votingStart, Timestamp votingEnd, Boolean isPrivate, Integer code, Long creatorId, List<Long> votesId) {
+    public PollDTO(UUID id, String question, Timestamp votingStart, Timestamp votingEnd, Boolean isPrivate, Integer code, UUID creatorId, List<UUID> votesId) {
         this.id = id;
         this.question = question;
         this.votingStart = votingStart;
@@ -30,12 +30,4 @@ public class PollDTO {
         this.votesId = votesId;
     }
 
-    public Poll convertToEntity(){
-        Poll poll = new Poll();
-        poll.setQuestion(this.question);
-        poll.setVotingStart(this.votingStart);
-        poll.setVotingEnd(this.votingEnd);
-        poll.setIsPrivate(this.isPrivate);
-        return poll;
-    }
 }

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -30,7 +31,7 @@ public class UserService {
         return userDAO.findAll();
     }
 
-    public Optional<UserClass> getUser(Long id){
+    public Optional<UserClass> getUser(UUID id){
         return userDAO.findById(id);
     }
 
@@ -39,26 +40,33 @@ public class UserService {
     }
 
     public UserClass createUser(UserClass user){
-        //TODO maybe handle this somewhere else?
-        Password encrypted = new Password(passwordEncoder.encode(user.getPassword().getPassword()));
+        var encrypted = new Password(passwordEncoder.encode(user.getPassword().getPassword()));
         user.setPassword(encrypted);
         return userDAO.save(user);
     }
 
-    public UserClass updateUser(Long id, UserDTO updatedUser){
-        var user = getUser(id);
-        if(user.isPresent()){
-            var userToUpdate = user.get();
+    public Optional<UserClass> updateUser(UserClass userToUpdate, UserDTO updatedUser){
+        if (updatedUser.getUsername() != null){
+            //Abort the update if trying to change username to an already taken username
+            if( getUserByUsername(updatedUser.getUsername()).isPresent()){
+                return Optional.empty();
+            }
             userToUpdate.setUsername(updatedUser.getUsername());
-            userToUpdate.setPassword(updatedUser.getPassword());
-            userToUpdate.setUserType(updatedUser.getUserType());
-            return userToUpdate;
-        }else{
-            return createUser(updatedUser.convertToEntity());
         }
+
+        //If the update is changing password then encrypt it also
+        if(updatedUser.getPassword() != null){
+            var encrypted = new Password(passwordEncoder.encode(updatedUser.getPassword().getPassword()));
+            userToUpdate.setPassword(encrypted);
+        }
+
+        if(updatedUser.getUserType() != null){
+            userToUpdate.setUserType(updatedUser.getUserType());
+        }
+        return Optional.of(userToUpdate);
     }
 
-    public void deleteUser(Long id){
+    public void deleteUser(UUID id){
         var userMaybe = getUser(id);
         if(userMaybe.isPresent()){
             var user = userMaybe.get();

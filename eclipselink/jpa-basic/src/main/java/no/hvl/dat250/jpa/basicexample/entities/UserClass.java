@@ -6,23 +6,24 @@ import no.hvl.dat250.jpa.basicexample.UserType;
 import no.hvl.dat250.jpa.basicexample.VoteType;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
-import no.hvl.dat250.jpa.basicexample.dto.UserDTO;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static no.hvl.dat250.jpa.basicexample.UserType.*;
 
 @Entity
 @Data
 public class UserClass {
-    @JsonIgnore
-    @Id
-    @GeneratedValue
-    private Long id;
 
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name="UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private UUID id;
 
     @Convert(converter = UsernameConverter.class)
     private Username username;
@@ -49,7 +50,7 @@ public class UserClass {
     }
 
     public Vote voteOnPoll(Poll poll, String option, VoteType voteType){
-        Vote vote = new Vote();
+        var vote = new Vote();
         vote.setOptionChosen(option);
         if(voteType.equals(VoteType.USER)){
             vote.addVoter(this);
@@ -68,19 +69,6 @@ public class UserClass {
                 ", userType: " + userType);
     }
 
-    public UserDTO convertToDTO(){
-        List<Long> createdPollsId = new ArrayList<>();
-        createdPolls.forEach(poll -> createdPollsId.add(poll.getId()));
-        List<Long> votesId = new ArrayList<>();
-        votes.forEach(vote -> votesId.add(vote.getId()));
-        return new UserDTO(this.id,
-                this.username,
-                this.password,
-                this.userType,
-                createdPollsId,
-                votesId);
-    }
-
 
     @Override
     public String toString(){
@@ -94,8 +82,19 @@ public class UserClass {
     }
 
     @Override
-    public int hashCode(){
-        return Objects.hash(username);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        var userClass = (UserClass) o;
+        return id.equals(userClass.id)
+                && Objects.equals(username, userClass.username)
+                && Objects.equals(password, userClass.password)
+                && userType == userClass.userType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, password, userType);
     }
 }
 

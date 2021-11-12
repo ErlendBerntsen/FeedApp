@@ -30,7 +30,7 @@ public class Password {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Password password1 = (Password) o;
+        var password1 = (Password) o;
         return password.equals(password1.password);
     }
 

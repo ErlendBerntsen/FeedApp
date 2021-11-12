@@ -2,16 +2,20 @@ package no.hvl.dat250.jpa.basicexample.entities;
 
 import lombok.Data;
 import no.hvl.dat250.jpa.basicexample.VoteType;
-import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Data
 public class Vote {
+
     @Id
-    @GeneratedValue
-    private Long  id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name="UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private UUID id;
 
     private String optionChosen;
 
@@ -28,16 +32,25 @@ public class Vote {
     }
 
     public void addVoter(UserClass user){
+        if(user == null){
+            return;
+        }
         this.voter = user;
         user.getVotes().add(this);
     }
 
     public void addPoll(Poll poll){
+        if(poll==null){
+            return;
+        }
         this.poll = poll;
         poll.getVotes().add(this);
     }
 
     public void removeVoter(){
+        if(this.voter == null){
+            return;
+        }
         this.voter.getVotes().remove(this);
         setVoter(null);
     }
@@ -47,14 +60,9 @@ public class Vote {
         setPoll(null);
     }
 
-    public VoteDTO convertToDTO(){
-        var voter = this.voter == null? null : this.voter.getId();
-        var poll = this.poll == null? null : this.poll.getId();
-        return new VoteDTO(this.id,
-                this.optionChosen,
-                this.voteType,
-                voter,
-                poll);
+    private String getVoterString(){
+        if(voter == null) return "";
+        return voter.getUserStringWithoutPollsAndVotes();
     }
 
     @Override
@@ -66,13 +74,18 @@ public class Vote {
                 ", poll: " + poll.toString());
     }
 
-    private String getVoterString(){
-        if(voter == null) return "";
-        return voter.getUserStringWithoutPollsAndVotes();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        var vote = (Vote) o;
+        return id.equals(vote.id)
+                && Objects.equals(optionChosen, vote.optionChosen)
+                && voteType == vote.voteType;
     }
 
     @Override
-    public int hashCode(){
-        return getClass().hashCode();
+    public int hashCode() {
+        return Objects.hash(id, optionChosen, voteType);
     }
 }
