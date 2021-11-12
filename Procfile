@@ -1,1 +1,1 @@
-web: java -jar /eclipselink/jpa-basic/target/jpa-basic-1.0-SNAPSHOT.jar
+web: java -jar target/feedapp-1.0-SNAPSHOT.jar
