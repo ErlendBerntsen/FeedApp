@@ -1,0 +1,1 @@
+web: java -jar target/jpa-basic-1.0-SNAPSHOT.jar
