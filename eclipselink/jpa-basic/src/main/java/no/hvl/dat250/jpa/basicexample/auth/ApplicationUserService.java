@@ -28,6 +28,7 @@ public class ApplicationUserService implements UserDetailsService {
         return new ApplicationUser(user.getId(),
                 user.getUsername().getUsername(),
                 user.getPassword().getPassword(),
+                user.getUserType(),
                 user.getUserType().getGrantedAuthorities(),
                 true ,
                 true ,

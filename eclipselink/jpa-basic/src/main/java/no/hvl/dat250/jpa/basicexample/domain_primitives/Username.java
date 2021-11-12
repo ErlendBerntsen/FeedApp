@@ -30,7 +30,7 @@ public class Username {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Username username1 = (Username) o;
+        var username1 = (Username) o;
         return username.equals(username1.username);
     }
 

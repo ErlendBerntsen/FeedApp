@@ -8,6 +8,7 @@ import no.hvl.dat250.jpa.basicexample.domain_primitives.Password;
 import no.hvl.dat250.jpa.basicexample.domain_primitives.Username;
 import no.hvl.dat250.jpa.basicexample.dto.CredentialsDTO;
 import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
+import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 import no.hvl.dat250.jpa.basicexample.entities.Poll;
 import no.hvl.dat250.jpa.basicexample.entities.UserClass;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,14 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -52,11 +53,15 @@ class PollControllerTests {
 
     private CredentialsDTO adminCredentials = new CredentialsDTO(new Username("admin"), new Password("password"));
 
+    private VoteDTO vote = new VoteDTO();
+
 
     @BeforeEach
     void setup(){
         pollDAO.deleteAll();
         userDAO.deleteAll();
+        vote.setVoteType(VoteType.GUEST);
+        vote.setOptionChosen("yes");
     }
 
 
@@ -114,8 +119,7 @@ class PollControllerTests {
 
         mockMvc.perform(delete(pollURL).header("Authorization", jwt))
                 .andExpect(status().isOk());
-        Long pollId = Long.parseLong(pollURL.substring(pollURL.length()-2));
-
+        UUID pollId = getUUIDFromPollURL(pollURL);
         assertTrue(pollDAO.findById(pollId).isEmpty());
     }
 
@@ -131,7 +135,7 @@ class PollControllerTests {
         mockMvc.perform(delete(pollURL).header("Authorization", jwt))
                 .andExpect(status().isForbidden());
 
-        Long pollId = Long.parseLong(pollURL.substring(pollURL.length()-2));
+        UUID pollId = getUUIDFromPollURL(pollURL);
         assertTrue(pollDAO.findById(pollId).isPresent());
     }
 
@@ -146,9 +150,10 @@ class PollControllerTests {
         mockMvc.perform(delete(pollURL))
                 .andExpect(status().isForbidden());
 
-        Long pollId = Long.parseLong(pollURL.substring(pollURL.length()-2));
+        UUID pollId = getUUIDFromPollURL(pollURL);
         assertTrue(pollDAO.findById(pollId).isPresent());
     }
+
 
     @Test
     void adminShouldGetAllPolls() throws Exception{
@@ -184,8 +189,7 @@ class PollControllerTests {
 
         mockMvc.perform(delete(pollURL).header("Authorization", jwt))
                 .andExpect(status().isOk());
-        Long pollId = Long.parseLong(pollURL.substring(pollURL.length()-2));
-
+        UUID pollId = getUUIDFromPollURL(pollURL);
         assertTrue(pollDAO.findById(pollId).isEmpty());
     }
 
@@ -245,6 +249,45 @@ class PollControllerTests {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void userShouldNotBeAbleToVoteOnPollThatIsHasNotStarted() throws Exception {
+        var poll = new Poll();
+        poll.setVotingStart(Timestamp.valueOf("9999-09-20 12:00:00"));
+        pollDAO.save(poll);
+
+        mockMvc.perform(post("/polls/" + poll.getId() + "/votes")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(vote)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void userShouldNotBeAbleToVoteOnPollThatIsHasEnded() throws Exception {
+        var poll = new Poll();
+        poll.setVotingStart(Timestamp.valueOf("1998-09-20 12:00:00"));
+        poll.setVotingEnd(Timestamp.valueOf("1999-09-20 12:00:00"));
+        pollDAO.save(poll);
+
+        mockMvc.perform(post("/polls/" + poll.getId() + "/votes")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(vote)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void userShouldBeAbleToVoteOnPollThatHasStarted() throws Exception {
+        var poll = new Poll();
+        poll.setVotingStart(Timestamp.valueOf("1998-09-20 12:00:00"));
+        poll.setVotingEnd(Timestamp.valueOf("3999-09-20 12:00:00"));
+        pollDAO.save(poll);
+
+        System.out.println(poll.getId());
+        mockMvc.perform(post("/polls/" + poll.getId() + "/votes")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(vote)))
+                .andExpect(status().isCreated());
+    }
+
 
     private String getJwtFromLoginRequest(CredentialsDTO credentials) throws Exception{
         var loginResponse = mockMvc.perform(post("/login")
@@ -281,6 +324,10 @@ class PollControllerTests {
         }
         userDAO.save(creator);
         return creator;
+    }
+
+    private UUID getUUIDFromPollURL(String pollURL) {
+        return UUID.fromString(pollURL.substring(pollURL.length()-36));
     }
 
 }

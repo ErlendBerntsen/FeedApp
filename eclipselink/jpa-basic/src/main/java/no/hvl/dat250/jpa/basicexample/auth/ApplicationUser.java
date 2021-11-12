@@ -1,16 +1,18 @@
 package no.hvl.dat250.jpa.basicexample.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonValue;
+import no.hvl.dat250.jpa.basicexample.UserType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 
 public class ApplicationUser implements UserDetails {
-    private final Long id;
+    private final UUID id;
     private final String username;
+    private final UserType userType;
 
     @JsonIgnore
     private final Set<? extends GrantedAuthority> grantedAuthorities;
@@ -25,9 +27,10 @@ public class ApplicationUser implements UserDetails {
     @JsonIgnore
     private final boolean isEnabled;
 
-    public ApplicationUser(Long id,
+    public ApplicationUser(UUID id,
                            String username,
                            String password,
+                           UserType userType,
                            Set<? extends GrantedAuthority> grantedAuthorities,
                            boolean isAccountNonExpired,
                            boolean isAccountNonLocked,
@@ -37,6 +40,7 @@ public class ApplicationUser implements UserDetails {
         this.grantedAuthorities = grantedAuthorities;
         this.password = password;
         this.username = username;
+        this.userType = userType;
         this.isAccountNonExpired = isAccountNonExpired;
         this.isAccountNonLocked = isAccountNonLocked;
         this.isCredentialsNonExpired = isCredentialsNonExpired;
@@ -84,8 +88,10 @@ public class ApplicationUser implements UserDetails {
         return isEnabled;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
+
+    public UserType getUserType(){return userType;}
 
 }

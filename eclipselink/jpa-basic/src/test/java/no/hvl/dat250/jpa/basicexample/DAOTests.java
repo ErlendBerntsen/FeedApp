@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -47,14 +48,14 @@ public class DAOTests {
         user.setPassword(new Password("password123"));
         user.setUserType(UserType.REGULAR);
 
-        poll = new Poll ();
+        poll = new Poll();
         poll.setIsPrivate(false);
         poll.setQuestion("Lorem ipsum?");
         poll.setVotingStart(Timestamp.valueOf("2020-09-20 00:00:00"));
-        poll.setVotingEnd(Timestamp.valueOf("2020-09-30 00:00:00"));
+        poll.setVotingEnd(Timestamp.valueOf("2021-09-30 00:00:00"));
         poll.setCode(123);
 
-        vote = new Vote ();
+        vote = new Vote();
         vote.setVoteType(VoteType.USER);
         vote.setOptionChosen("yes");
 
@@ -72,7 +73,7 @@ public class DAOTests {
 
     @Test
     public void nonPersistedUserShouldNotBeFoundInDatabase(){
-        Optional<UserClass> userMaybe = userDAO.findById(-1L);
+        Optional<UserClass> userMaybe = userDAO.findById(UUID.randomUUID());
         assertFalse(userMaybe.isPresent());
     }
 
@@ -133,6 +134,7 @@ public class DAOTests {
     @Test
     public void shouldCreateUserForeignKeyInPollTable(){
         poll.addCreator(user);
+        pollDAO.save(poll);
         userDAO.save(user);
         pollDAO.save(poll);
         UserClass creator = pollDAO.getById(poll.getId()).getCreator();
@@ -150,6 +152,9 @@ public class DAOTests {
     public void shouldCreatePollForeignKeyInVoteTable(){
         vote.addPoll(poll);
         pollDAO.save(poll); //This also persists the vote
+        System.out.println(vote);
+        Vote newvote = new Vote();
+        System.out.println("NEW VOTE: " + newvote.getId());
         assertTrue(voteDAO.findById(vote.getId()).isPresent());
         Poll p = voteDAO.findById(vote.getId()).get().getPoll();
         assertEquals(p.getId(), poll.getId());

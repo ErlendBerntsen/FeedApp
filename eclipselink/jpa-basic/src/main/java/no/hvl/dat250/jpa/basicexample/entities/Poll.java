@@ -2,18 +2,20 @@ package no.hvl.dat250.jpa.basicexample.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import no.hvl.dat250.jpa.basicexample.dto.PollDTO;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
 @Data
 public class Poll {
     @Id
-    @GeneratedValue
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name="UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private UUID id;
     private String question;
 
     /*
@@ -49,6 +51,31 @@ public class Poll {
         setCode(random.nextInt(upperbound-lowerbound)+lowerbound);
     }
 
+    public boolean isPollOpenForVoting(){
+        var currentTime = Timestamp.valueOf(LocalDateTime.now());
+        return currentTime.after(votingStart) && (votingEnd == null || currentTime.before(votingEnd));
+    }
+
+    public Integer getYesVotes(){
+        var yesVotes = 0;
+        for(Vote vote : votes){
+            if("yes".equalsIgnoreCase(vote.getOptionChosen())){
+                yesVotes++;
+            }
+        }
+        return yesVotes;
+    }
+
+    public Integer getNoVotes(){
+        var noVotes = 0;
+        for(Vote vote : votes){
+            if("no".equalsIgnoreCase(vote.getOptionChosen())){
+                noVotes++;
+            }
+        }
+        return noVotes;
+    }
+
     public void addCreator(UserClass user){
         if(user == null){
             return;
@@ -63,19 +90,6 @@ public class Poll {
         setCreator(null);
     }
 
-    public PollDTO convertToDTO(){
-        List<Long> votesId = new ArrayList<>();
-        votes.forEach(vote -> votesId.add(vote.getId()));
-        var pollCreator = creator == null? null : creator.getId();
-        return new PollDTO(this.id,
-                this.question,
-                this.votingStart,
-                this.votingEnd,
-                this.isPrivate,
-                this.code,
-                pollCreator,
-                votesId);
-    }
 
     @Override
     public String toString(){
@@ -94,8 +108,20 @@ public class Poll {
     }
 
     @Override
-    public int hashCode(){
-        return Objects.hash(question);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        var poll = (Poll) o;
+        return id.equals(poll.id)
+                && Objects.equals(question, poll.question)
+                && Objects.equals(votingStart, poll.votingStart)
+                && Objects.equals(votingEnd, poll.votingEnd)
+                && Objects.equals(isPrivate, poll.isPrivate)
+                && Objects.equals(code, poll.code);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, question, votingStart, votingEnd, isPrivate, code);
+    }
 }

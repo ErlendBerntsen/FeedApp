@@ -1,18 +1,18 @@
 package no.hvl.dat250.jpa.basicexample.auth;
 
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Data;
 
 import java.security.Principal;
+import java.util.UUID;
 
 @Data
 public class UsernameIdPrincipal implements Principal {
 
-    private final Long id;
+    private final UUID id;
     private final String username;
 
-    public UsernameIdPrincipal(Long id, String username) {
+    public UsernameIdPrincipal(UUID id, String username) {
         this.id = id;
         this.username = username;
     }
