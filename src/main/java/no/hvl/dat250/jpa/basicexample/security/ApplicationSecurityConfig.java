@@ -54,11 +54,6 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         var configuration = new CorsConfiguration();
         configuration.addAllowedHeader("*");
         configuration.addExposedHeader("Authorization");
-        //TODO make this dynamic (localhost 8080 only accept localhost 3000, deployed backend only accpet deployed frontend
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:8080",
-                "http://localhost:3000",
-                "https://feedapp-group6.herokuapp.com"));
         configuration.setAllowedMethods(Arrays.asList(
                 "GET",
                 "POST",
@@ -66,6 +61,17 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 "DELETE",
                 "OPTIONS"
         ));
+        //TODO make this dynamic (localhost 8080 only accept localhost 3000, deployed backend only accpet deployed frontend
+        if(System.getenv("FRONTEND_ENDPOINT") != null){
+            System.out.println("Production environment");
+            configuration.setAllowedOrigins(Arrays.asList(System.getenv("FRONTEND_ENDPOINT")));
+        }else{
+            System.out.println("Developing environment");
+            configuration.setAllowedOrigins(Arrays.asList(
+                    "http://localhost:8080",
+                    "http://localhost:3000"));
+        }
+
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
