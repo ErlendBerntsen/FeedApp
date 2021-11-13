@@ -61,9 +61,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 "DELETE",
                 "OPTIONS"
         ));
-        //TODO make this dynamic (localhost 8080 only accept localhost 3000, deployed backend only accpet deployed frontend
         if(System.getenv("FRONTEND_ENDPOINT") != null){
-            System.out.println("Production environment");
             configuration.setAllowedOrigins(Arrays.asList(System.getenv("FRONTEND_ENDPOINT")));
         }else{
             System.out.println("Developing environment");
