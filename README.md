@@ -4,7 +4,7 @@
 
 | Status|Deployment| 
 |:----------:|:-------------:|
-|![CI](https://github.com/ErlendBerntsen/FeedApp/actions/workflows/main.yml/badge.svg)|[API](https://feedapp-group6-api.herokuapp.com) |
+|[![CI](https://github.com/ErlendBerntsen/FeedApp/actions/workflows/main.yml/badge.svg)](https://github.com/ErlendBerntsen/FeedApp/actions/workflows/main.yml)|[API](https://feedapp-group6-api.herokuapp.com) |
 
 ## Introduction
 This is a group project for DAT250 which we've worked on through the fall semester of 2021.
