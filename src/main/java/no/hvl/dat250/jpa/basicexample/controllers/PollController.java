@@ -8,6 +8,7 @@ import no.hvl.dat250.jpa.basicexample.dto.VoteDTO;
 import no.hvl.dat250.jpa.basicexample.services.PollService;
 import no.hvl.dat250.jpa.basicexample.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -93,7 +94,10 @@ public class PollController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Object> createPoll(@RequestBody PollDTO poll){
         var newPoll = pollService.createPoll(mapper.convertPollDTOToEntity(poll));
-        return ResponseEntity.created(URI.create("/polls/" + newPoll.getId())).build();
+        var location = URI.create("/polls/" + newPoll.getId());
+        var responseHeaders = new HttpHeaders();
+        responseHeaders.setLocation(location);
+        return new ResponseEntity<>(mapper.convertPollEntityToDTO(newPoll), responseHeaders, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")

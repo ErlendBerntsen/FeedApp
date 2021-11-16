@@ -35,7 +35,7 @@ public class DatabaseInitializer implements CommandLineRunner{
     public void run(String... args) throws Exception {
         var user1 = new UserClass();
         user1.setUsername(new Username("Erlend"));
-        user1.setPassword(new Password(passwordEncoder.encode("p4ssw0rd")));
+        user1.setPassword(new Password(passwordEncoder.encode("password")));
         user1.setUserType(UserType.ADMIN);
 
         var user2 = new UserClass();
@@ -62,22 +62,23 @@ public class DatabaseInitializer implements CommandLineRunner{
         var poll1 = new Poll();
         poll1.setIsPrivate(false);
         poll1.setQuestion("Is pineapple on pizza allowed?");
-        poll1.setVotingStart(Timestamp.valueOf(LocalDateTime.now().plusYears(5)));
-        poll1.setVotingEnd(Timestamp.valueOf(LocalDateTime.now().plusYears(20)));
+        poll1.setVotingStart(Timestamp.valueOf(LocalDateTime.now().minusDays(5)));
+        poll1.setVotingEnd(Timestamp.valueOf(LocalDateTime.now().plusDays(5)));
         poll1.addCreator(user1);
+        poll1.setCode(123456); //Hardcoded to make testing easier on frontend
 
         var poll2 = new Poll ();
         poll2.setIsPrivate(true);
         poll2.setQuestion("Are dogs better than cats?");
-        poll2.setVotingStart(Timestamp.valueOf("2021-12-12 12:00:00"));
-        poll2.setVotingEnd(Timestamp.valueOf("2021-12-12 12:30:00"));
+        poll2.setVotingStart(Timestamp.valueOf("2022-12-12 12:00:00"));
+        poll2.setVotingEnd(Timestamp.valueOf("2022-12-12 12:30:00"));
         poll2.addCreator(user2);
 
         var poll3 = new Poll ();
         poll3.setIsPrivate(false);
-        poll3.setQuestion("Is there a war in Bas Sing Se?");
+        poll3.setQuestion("Is there a war in Ba Sing Se?");
         poll3.setVotingStart(Timestamp.valueOf(LocalDateTime.now().plusYears(4)));
-        poll3.setVotingEnd(Timestamp.valueOf("2022-01-01 00:00:00"));
+        poll3.setVotingEnd(Timestamp.valueOf(LocalDateTime.now().plusYears(10)));
 
         user1.voteOnPoll(poll1, "yes", VoteType.USER);
         user2.voteOnPoll(poll1, "no", VoteType.ANONYMOUS);
