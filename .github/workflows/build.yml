@@ -17,6 +17,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Create Postgres Database
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: '14'
+          postgresql db: feedapp
+          postgresql user: feedapp
+          postgresql password: feedapp
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
