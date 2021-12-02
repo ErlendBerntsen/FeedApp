@@ -38,7 +38,9 @@
           <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
           <maven.compiler.source>1.9</maven.compiler.source>
           <maven.compiler.target>1.9</maven.compiler.target>
-      </properties>
+          <sonar.organization>erlendberntsen</sonar.organization>
+          <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+  </properties>
 
   <dependencies>
       <dependency>
